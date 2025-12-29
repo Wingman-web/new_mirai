@@ -1,0 +1,22 @@
+*.psd filter=lfs diff=lfs merge=lfs -text
+components/Home/Hero/mirai_home1.mov filter=lfs diff=lfs merge=lfs -text
+public/videos/mirai_home1.mov filter=lfs diff=lfs merge=lfs -text
+# Keep other large media in LFS, but store UI images in the repo so build systems receive real binaries
+public/images/* -filter -diff -merge -text
+# Explicitly keep panorama and masterplan and animated GIF as normal blobs
+public/200m.jpg -filter -diff -merge -text
+public/master_plan.png -filter -diff -merge -text
+public/Earth animated.gif -filter -diff -merge -text
+*.webm filter=lfs diff=lfs merge=lfs -text
+*.otf filter=lfs diff=lfs merge=lfs -text
+*.png filter=lfs diff=lfs merge=lfs -text
+*.jpeg filter=lfs diff=lfs merge=lfs -text
+*.gif filter=lfs diff=lfs merge=lfs -text
+*.mp4 filter=lfs diff=lfs merge=lfs -text
+*.mov filter=lfs diff=lfs merge=lfs -text
+*.jpg filter=lfs diff=lfs merge=lfs -text
+*.webp filter=lfs diff=lfs merge=lfs -text
+*.zip filter=lfs diff=lfs merge=lfs -text
+*.woff2 filter=lfs diff=lfs merge=lfs -text
+*.ttf filter=lfs diff=lfs merge=lfs -text
+public/videos/mirai_home_1.mp4 filter=lfs diff=lfs merge=lfs -text
