@@ -491,11 +491,13 @@ export function RevealZoom({
 
     }, wrapperRef);
 
+      })();
+
     return () => {
       if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
       ctxRef.current?.revert();
     };
-}, [scrollDistance, buildingZoomScale, windowZoomScale, windowMoveDistance, scheduleCanvasDraw, imageLoaded, buildingLoaded]);
+  }, [scrollDistance, buildingZoomScale, windowZoomScale, windowMoveDistance, scheduleCanvasDraw, imageLoaded, buildingLoaded]);
 
   useEffect(() => {
     return () => {
