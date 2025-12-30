@@ -96,8 +96,7 @@ export default function ImageScrollScrubber() {
       const dpr = window.devicePixelRatio || 1;
       canvas.width = window.innerWidth * dpr;
       canvas.height = window.innerHeight * dpr;
-      const ctx = canvas.getContext('2d');
-      if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      canvas.getContext('2d')?.scale(dpr, dpr);
 
       // Create GSAP Timeline
       const tl = gsap.timeline({
@@ -116,14 +115,12 @@ export default function ImageScrollScrubber() {
       // Animate frame property from 0 to last index
       tl.to(frameObj.current, {
         frame: imagesRef.current.length - 1,
-        // Snap to nearest integer for the `frame` property (typed SnapVars)
-        snap: { frame: 1 },
+        snap: "frame", // Optional: snap to whole numbers
         ease: "none",
         onUpdate: render
       });
 
-      // Refresh ScrollTrigger measurements and do an initial render
-      ScrollTrigger.refresh();
+      // Initial render
       render();
     };
 
@@ -135,8 +132,7 @@ export default function ImageScrollScrubber() {
       const dpr = window.devicePixelRatio || 1;
       canvas.width = window.innerWidth * dpr;
       canvas.height = window.innerHeight * dpr;
-      const ctx = canvas.getContext('2d');
-      if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      canvas.getContext('2d')?.scale(dpr, dpr);
       render();
     };
 
