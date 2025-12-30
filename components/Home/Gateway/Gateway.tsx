@@ -5,7 +5,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import type { StaticImageData } from 'next/image';
 
-// Pointer hotspot component with hover expand effect
+// Hotspot component
 interface HotspotProps {
   title: string;
   subtitle: string;
@@ -52,30 +52,26 @@ function Hotspot({ title, subtitle, description, position }: HotspotProps) {
           pointerEvents: isHovered ? 'none' : 'auto',
         }}
       >
-        <h3 
-          style={{
-            color: '#FFFFFF',
-            fontSize: '16px',
-            fontWeight: '400',
-            letterSpacing: '0.15em',
-            textTransform: 'uppercase',
-            textShadow: '0 2px 10px rgba(0,0,0,0.8)',
-            whiteSpace: 'nowrap',
-          }}
-        >
+        <h3 style={{
+          color: '#FFFFFF',
+          fontSize: '16px',
+          fontWeight: '400',
+          letterSpacing: '0.15em',
+          textTransform: 'uppercase',
+          textShadow: '0 2px 10px rgba(0,0,0,0.8)',
+          whiteSpace: 'nowrap',
+        }}>
           {title}
         </h3>
-        <p 
-          style={{
-            color: 'rgba(255, 255, 255, 0.6)',
-            fontSize: '11px',
-            letterSpacing: '0.1em',
-            textTransform: 'uppercase',
-            textShadow: '0 2px 10px rgba(0,0,0,0.8)',
-            marginTop: '2px',
-            whiteSpace: 'nowrap',
-          }}
-        >
+        <p style={{
+          color: 'rgba(255, 255, 255, 0.6)',
+          fontSize: '11px',
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase',
+          textShadow: '0 2px 10px rgba(0,0,0,0.8)',
+          marginTop: '2px',
+          whiteSpace: 'nowrap',
+        }}>
           {subtitle}
         </p>
       </div>
@@ -102,38 +98,32 @@ function Hotspot({ title, subtitle, description, position }: HotspotProps) {
             boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
           }}
         >
-          <h3 
-            style={{
-              color: '#FFFFFF',
-              fontSize: '18px',
-              fontWeight: '400',
-              letterSpacing: '0.2em',
-              textTransform: 'uppercase',
-              marginBottom: '4px',
-            }}
-          >
+          <h3 style={{
+            color: '#FFFFFF',
+            fontSize: '18px',
+            fontWeight: '400',
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+            marginBottom: '4px',
+          }}>
             {title}
           </h3>
-          <p 
-            style={{
-              color: 'rgba(255, 255, 255, 0.5)',
-              fontSize: '12px',
-              letterSpacing: '0.15em',
-              textTransform: 'uppercase',
-              marginBottom: '16px',
-            }}
-          >
+          <p style={{
+            color: 'rgba(255, 255, 255, 0.5)',
+            fontSize: '12px',
+            letterSpacing: '0.15em',
+            textTransform: 'uppercase',
+            marginBottom: '16px',
+          }}>
             {subtitle}
           </p>
-          <p 
-            style={{
-              color: 'rgba(255, 255, 255, 0.85)',
-              fontSize: '14px',
-              fontWeight: '300',
-              lineHeight: '1.7',
-              letterSpacing: '0.02em',
-            }}
-          >
+          <p style={{
+            color: 'rgba(255, 255, 255, 0.85)',
+            fontSize: '14px',
+            fontWeight: '300',
+            lineHeight: '1.7',
+            letterSpacing: '0.02em',
+          }}>
             {description}
           </p>
         </div>
@@ -171,13 +161,14 @@ export function RevealZoom({
   const pointer2Ref = useRef<HTMLDivElement>(null);
   const pointer3Ref = useRef<HTMLDivElement>(null);
   const pointer4Ref = useRef<HTMLDivElement>(null);
-  const ctxRef = useRef<gsap.Context | null>(null);
   const canvasCtxRef = useRef<CanvasRenderingContext2D | null>(null);
   const rafIdRef = useRef<number | null>(null);
   const needsDrawRef = useRef(false);
+  const scrollTriggerRef = useRef<ScrollTrigger | null>(null);
+  const timelineRef = useRef<gsap.core.Timeline | null>(null);
+  const isLockedRef = useRef(true); // START LOCKED
   
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [userHasScrolled, setUserHasScrolled] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const imageRef = useRef<HTMLImageElement | null>(null);
   
@@ -193,7 +184,7 @@ export function RevealZoom({
   const resolvedShapeSrc = typeof shapeImage === 'string' ? shapeImage : shapeImage.src;
 
   // ============================================
-  // STEP 1: Mount and force scroll to top
+  // MOUNT: Force scroll to top and set up lock
   // ============================================
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -203,101 +194,80 @@ export function RevealZoom({
       window.history.scrollRestoration = 'manual';
     }
 
-    // Force scroll to top immediately
+    // Force scroll to top
     window.scrollTo(0, 0);
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
 
-    // Mark as mounted after scroll reset
+    // Keep locked initially
+    isLockedRef.current = true;
+
     setIsMounted(true);
   }, []);
 
   // ============================================
-  // STEP 2: Detect REAL user scroll (not browser restore)
-  // Only enable animations after user actually scrolls
+  // UNLOCK: Only unlock after detecting real user scroll
   // ============================================
   useEffect(() => {
     if (typeof window === 'undefined' || !isMounted) return;
 
-    let initialScrollY = window.scrollY;
-    let hasDetectedUserScroll = false;
+    let unlocked = false;
 
-    // Wait a bit for any browser scroll restoration to settle
-    const initTimeout = setTimeout(() => {
-      // Reset scroll one more time
+    const unlock = () => {
+      if (unlocked) return;
+      unlocked = true;
+      isLockedRef.current = false;
+      
+      // Remove all listeners once unlocked
+      window.removeEventListener('wheel', unlock);
+      window.removeEventListener('touchstart', unlock);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const scrollKeys = ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Space', 'Home', 'End'];
+      if (scrollKeys.includes(e.code)) {
+        unlock();
+      }
+    };
+
+    // Wait for browser to finish any scroll restoration
+    const timer = setTimeout(() => {
+      // Force scroll to 0 one more time
       window.scrollTo(0, 0);
-      initialScrollY = 0;
-
-      const handleScroll = () => {
-        // Only count as user scroll if:
-        // 1. We haven't already detected a user scroll
-        // 2. The scroll is moving DOWN (user initiated)
-        // 3. Some time has passed since page load
-        if (!hasDetectedUserScroll && window.scrollY > initialScrollY + 5) {
-          hasDetectedUserScroll = true;
-          setUserHasScrolled(true);
-          window.removeEventListener('scroll', handleScroll);
-        }
-      };
-
-      const handleWheel = () => {
-        // Wheel event is definitely user-initiated
-        if (!hasDetectedUserScroll) {
-          hasDetectedUserScroll = true;
-          setUserHasScrolled(true);
-          window.removeEventListener('wheel', handleWheel);
-          window.removeEventListener('scroll', handleScroll);
-        }
-      };
-
-      const handleTouchMove = () => {
-        // Touch is definitely user-initiated
-        if (!hasDetectedUserScroll) {
-          hasDetectedUserScroll = true;
-          setUserHasScrolled(true);
-          window.removeEventListener('touchmove', handleTouchMove);
-          window.removeEventListener('scroll', handleScroll);
-        }
-      };
-
-      const handleKeyDown = (e: KeyboardEvent) => {
-        // Arrow keys, Page Up/Down, Space, Home, End
-        const scrollKeys = ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Space', 'Home', 'End'];
-        if (scrollKeys.includes(e.code) && !hasDetectedUserScroll) {
-          hasDetectedUserScroll = true;
-          setUserHasScrolled(true);
-          window.removeEventListener('keydown', handleKeyDown);
-          window.removeEventListener('scroll', handleScroll);
-        }
-      };
-
-      window.addEventListener('scroll', handleScroll, { passive: true });
-      window.addEventListener('wheel', handleWheel, { passive: true });
-      window.addEventListener('touchmove', handleTouchMove, { passive: true });
+      
+      // Now listen for real user input
+      window.addEventListener('wheel', unlock, { passive: true, once: true });
+      window.addEventListener('touchstart', unlock, { passive: true, once: true });
       window.addEventListener('keydown', handleKeyDown, { passive: true });
-
-    }, 300); // Wait 300ms for browser restore to settle
+    }, 500); // Wait 500ms for any browser shenanigans
 
     return () => {
-      clearTimeout(initTimeout);
+      clearTimeout(timer);
+      window.removeEventListener('wheel', unlock);
+      window.removeEventListener('touchstart', unlock);
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, [isMounted]);
 
   // ============================================
-  // Handle page show (back/forward cache)
+  // Handle bfcache (back/forward navigation)
   // ============================================
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
     const handlePageShow = (event: PageTransitionEvent) => {
       if (event.persisted) {
-        // Page was restored from bfcache
+        // Page restored from cache - reset everything
         window.scrollTo(0, 0);
-        setUserHasScrolled(false);
+        isLockedRef.current = true;
         
-        // Re-enable scroll detection
+        // Re-lock and wait for user input again
         setTimeout(() => {
-          setUserHasScrolled(false);
+          window.scrollTo(0, 0);
+          if (timelineRef.current) {
+            timelineRef.current.progress(0);
+          }
         }, 100);
       }
     };
@@ -368,10 +338,7 @@ export function RevealZoom({
     canvas.width = rect.width;
     canvas.height = rect.height;
     
-    const ctx = canvas.getContext('2d', {
-      alpha: false,
-      desynchronized: true,
-    });
+    const ctx = canvas.getContext('2d', { alpha: false });
     
     if (ctx) {
       ctx.imageSmoothingEnabled = true;
@@ -384,12 +351,11 @@ export function RevealZoom({
     drawCanvas();
   }, [drawCanvas]);
 
-  // Load window image
+  // Load image
   useEffect(() => {
     if (!isMounted) return;
     
     const img = new Image();
-    img.decoding = 'async';
     img.onload = () => {
       imageRef.current = img;
       setImageLoaded(true);
@@ -397,7 +363,7 @@ export function RevealZoom({
     img.src = resolvedWindowSrc;
   }, [resolvedWindowSrc, isMounted]);
 
-  // Setup canvas when image loads
+  // Setup canvas
   useEffect(() => {
     if (imageLoaded && isMounted) setupCanvas();
   }, [imageLoaded, setupCanvas, isMounted]);
@@ -411,9 +377,7 @@ export function RevealZoom({
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
         setupCanvas();
-        if (userHasScrolled) {
-          ScrollTrigger.refresh();
-        }
+        ScrollTrigger.refresh();
       }, 100);
     };
     
@@ -422,139 +386,157 @@ export function RevealZoom({
       clearTimeout(resizeTimeout);
       window.removeEventListener('resize', handleResize);
     };
-  }, [setupCanvas, isMounted, userHasScrolled]);
+  }, [setupCanvas, isMounted]);
 
   // ============================================
-  // STEP 3: Initialize GSAP only AFTER user scrolls
+  // MAIN ANIMATION SETUP
+  // Uses onUpdate to check lock status
   // ============================================
   useEffect(() => {
-    if (typeof window === 'undefined' || !imageLoaded || !isMounted || !userHasScrolled) return;
+    if (typeof window === 'undefined' || !imageLoaded || !isMounted) return;
 
-    // Register plugin
+    // Register GSAP
     gsap.registerPlugin(ScrollTrigger);
 
+    // Kill existing
+    ScrollTrigger.getAll().forEach(st => st.kill());
+    if (timelineRef.current) timelineRef.current.kill();
+
+    // Force scroll to 0 before setup
+    window.scrollTo(0, 0);
+
     // Reset animation state
-    animState.current = {
-      scale: 1,
-      panY: 0,
-      lastScale: -1,
-      lastPanY: -1,
+    animState.current = { scale: 1, panY: 0, lastScale: -1, lastPanY: -1 };
+
+    // Set initial element states
+    gsap.set(buildingRef.current, { scale: 1, opacity: 1 });
+    gsap.set(shapeRef.current, { opacity: 1 });
+    gsap.set(textRef.current, { opacity: 0, y: 40 });
+    gsap.set([pointer1Ref.current, pointer2Ref.current, pointer3Ref.current, pointer4Ref.current], { 
+      opacity: 0, 
+      scale: 0 
+    });
+
+    // Create timeline (paused - we'll control it manually)
+    const tl = gsap.timeline({ paused: true });
+    timelineRef.current = tl;
+
+    // PHASE 1: Building zoom
+    tl.to(buildingRef.current, {
+      scale: buildingZoomScale,
+      ease: "none",
+      duration: 8.0,
+    }, 0);
+    
+    tl.to(buildingRef.current, {
+      opacity: 0,
+      ease: "none",
+      duration: 2.5,
+    }, 5.5);
+    
+    tl.to(shapeRef.current, {
+      opacity: 0,
+      ease: "none",
+      duration: 3.0,
+    }, 0);
+
+    // PHASE 2: Text Entry
+    tl.to(textRef.current, {
+      opacity: 1,
+      y: 0,
+      ease: "none", 
+      duration: 0.8,
+    }, 1.5);
+
+    // PHASE 3: Canvas Zoom
+    tl.to(animState.current, {
+      scale: windowZoomScale,
+      duration: 2.0,
+      ease: "none", 
+      onUpdate: scheduleCanvasDraw,
+    }, 4.5);
+
+    // PHASE 4: Text Exit
+    tl.to(textRef.current, {
+      opacity: 0,
+      y: -30,
+      ease: "none",
+      duration: 0.5,
+    }, 6.0);
+
+    // PHASE 5: Canvas Pan
+    tl.to(animState.current, {
+      panY: windowMoveDistance,
+      duration: 4.5, 
+      ease: "none", 
+      onUpdate: scheduleCanvasDraw,
+    }, 6.5);
+
+    // Pointers
+    const animatePointer = (ref: React.RefObject<HTMLDivElement | null>, inT: number, outT: number) => {
+      tl.to(ref.current, { opacity: 1, scale: 1, ease: "none", duration: 0.6 }, inT);
+      tl.to(ref.current, { opacity: 0, scale: 0.95, ease: "none", duration: 0.5 }, outT);
     };
 
-    // Clear any existing ScrollTriggers
-    ScrollTrigger.getAll().forEach(st => st.kill());
-    
-    ctxRef.current = gsap.context(() => {
-      // Set initial states
-      gsap.set(textRef.current, { opacity: 0, y: 40, force3D: true });
-      gsap.set([pointer1Ref.current, pointer2Ref.current, pointer3Ref.current, pointer4Ref.current], { 
-        opacity: 0, 
-        scale: 0,
-        force3D: true
-      });
-      
-      gsap.set(buildingRef.current, { force3D: true, scale: 1, opacity: 1 });
-      gsap.set(shapeRef.current, { force3D: true, opacity: 1 });
-      
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: wrapperRef.current,
-          start: "top top",
-          end: scrollDistance,
-          pin: true,
-          scrub: 0.5,
-          anticipatePin: 1,
-          fastScrollEnd: true,
-          preventOverlaps: true,
-          invalidateOnRefresh: true,
-        },
-      });
+    animatePointer(pointer1Ref, 6.8, 8.0);
+    animatePointer(pointer2Ref, 8.3, 9.5);
+    animatePointer(pointer3Ref, 9.8, 11.0);
+    animatePointer(pointer4Ref, 11.3, 12.5);
 
-      // PHASE 1: Building zoom
-      tl.to(buildingRef.current, {
-        scale: buildingZoomScale,
-        ease: "none",
-        duration: 8.0,
-      }, 0);
-      
-      tl.to(buildingRef.current, {
-        opacity: 0,
-        ease: "none",
-        duration: 2.5,
-      }, 5.5);
-      
-      // Shape disappears
-      tl.to(shapeRef.current, {
-        opacity: 0,
-        ease: "none",
-        duration: 3.0,
-      }, 0);
+    // Store last valid progress to prevent jumps
+    let lastProgress = 0;
 
-      // PHASE 2: Text Entry
-      tl.to(textRef.current, {
-        opacity: 1,
-        y: 0,
-        ease: "none", 
-        duration: 0.8,
-      }, 1.5);
+    // Create ScrollTrigger that controls the timeline
+    const st = ScrollTrigger.create({
+      trigger: wrapperRef.current,
+      start: "top top",
+      end: scrollDistance,
+      pin: true,
+      scrub: 0.5,
+      anticipatePin: 1,
+      onUpdate: (self) => {
+        // CRITICAL: Only update timeline if unlocked
+        if (isLockedRef.current) {
+          // Stay at 0 if locked
+          tl.progress(0);
+          return;
+        }
+        
+        // Normal operation - update timeline based on scroll
+        const progress = self.progress;
+        
+        // Prevent backwards jumps that might happen on refresh
+        if (progress < lastProgress - 0.1 && lastProgress > 0.5) {
+          // This might be a refresh causing a jump - ignore it
+          return;
+        }
+        
+        lastProgress = progress;
+        tl.progress(progress);
+      },
+      onRefresh: () => {
+        // On refresh, if locked, ensure we're at 0
+        if (isLockedRef.current) {
+          tl.progress(0);
+          window.scrollTo(0, 0);
+        }
+      }
+    });
 
-      // PHASE 3: Canvas Zoom
-      tl.to(animState.current, {
-        scale: windowZoomScale,
-        duration: 2.0,
-        ease: "none", 
-        onUpdate: scheduleCanvasDraw,
-      }, 4.5);
+    scrollTriggerRef.current = st;
 
-      // PHASE 4: Text Exit
-      tl.to(textRef.current, {
-        opacity: 0,
-        y: -30,
-        ease: "none",
-        duration: 0.5,
-      }, 6.0);
-
-      // PHASE 5: Canvas Pan
-      tl.to(animState.current, {
-        panY: windowMoveDistance,
-        duration: 4.5, 
-        ease: "none", 
-        onUpdate: scheduleCanvasDraw,
-      }, 6.5);
-
-      // Animate pointers
-      const animatePointer = (ref: React.RefObject<HTMLDivElement | null>, inT: number, outT: number) => {
-        tl.to(ref.current, { 
-          opacity: 1, 
-          scale: 1, 
-          ease: "none", 
-          duration: 0.6 
-        }, inT);
-        tl.to(ref.current, { 
-          opacity: 0, 
-          scale: 0.95, 
-          ease: "none", 
-          duration: 0.5 
-        }, outT);
-      };
-
-      animatePointer(pointer1Ref, 6.8, 8.0);
-      animatePointer(pointer2Ref, 8.3, 9.5);
-      animatePointer(pointer3Ref, 9.8, 11.0);
-      animatePointer(pointer4Ref, 11.3, 12.5);
-
-      // Refresh after setup
-      ScrollTrigger.refresh(true);
-
-    }, wrapperRef);
+    // Force initial state
+    tl.progress(0);
+    ScrollTrigger.refresh();
 
     return () => {
       if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
-      ctxRef.current?.revert();
+      st.kill();
+      tl.kill();
     };
-  }, [scrollDistance, buildingZoomScale, windowZoomScale, windowMoveDistance, scheduleCanvasDraw, imageLoaded, isMounted, userHasScrolled]);
+  }, [scrollDistance, buildingZoomScale, windowZoomScale, windowMoveDistance, scheduleCanvasDraw, imageLoaded, isMounted]);
 
-  // Cleanup on unmount
+  // Cleanup
   useEffect(() => {
     return () => {
       if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
@@ -562,13 +544,9 @@ export function RevealZoom({
     };
   }, []);
 
-  // Show loading state until mounted
   if (!isMounted) {
     return (
-      <section 
-        className="relative w-full bg-black" 
-        style={{ minHeight: '100vh', zIndex: 50 }}
-      >
+      <section className="relative w-full bg-black" style={{ minHeight: '100vh', zIndex: 50 }}>
         <div className="relative w-full h-screen overflow-hidden bg-black" />
       </section>
     );
@@ -599,19 +577,10 @@ export function RevealZoom({
         <canvas 
           ref={canvasRef} 
           className="absolute inset-0 w-full h-full" 
-          style={{ 
-            zIndex: 1, 
-            backgroundColor: '#000',
-            imageRendering: 'auto',
-          }} 
+          style={{ zIndex: 1, backgroundColor: '#000' }} 
         />
 
-        {/* Hotspot 1 - Top Left */}
-        <div 
-          ref={pointer1Ref} 
-          className="absolute"
-          style={{ zIndex: 20, top: '18%', left: '5%', opacity: 0 }}
-        >
+        <div ref={pointer1Ref} className="absolute" style={{ zIndex: 20, top: '18%', left: '5%', opacity: 0 }}>
           <Hotspot
             title="Penthouses"
             subtitle="Floors 29-32"
@@ -620,12 +589,7 @@ export function RevealZoom({
           />
         </div>
 
-        {/* Hotspot 2 - Top Right */}
-        <div 
-          ref={pointer2Ref} 
-          className="absolute"
-          style={{ zIndex: 20, top: '22%', right: '5%', opacity: 0 }}
-        >
+        <div ref={pointer2Ref} className="absolute" style={{ zIndex: 20, top: '22%', right: '5%', opacity: 0 }}>
           <Hotspot
             title="Sky Lounge"
             subtitle="Level 35 - Rooftop"
@@ -634,12 +598,7 @@ export function RevealZoom({
           />
         </div>
 
-        {/* Hotspot 3 - Bottom Left */}
-        <div 
-          ref={pointer3Ref} 
-          className="absolute"
-          style={{ zIndex: 20, bottom: '28%', left: '8%', opacity: 0 }}
-        >
+        <div ref={pointer3Ref} className="absolute" style={{ zIndex: 20, bottom: '28%', left: '8%', opacity: 0 }}>
           <Hotspot
             title="Wellness Spa"
             subtitle="Levels 3-4"
@@ -648,12 +607,7 @@ export function RevealZoom({
           />
         </div>
 
-        {/* Hotspot 4 - Bottom Right */}
-        <div 
-          ref={pointer4Ref} 
-          className="absolute"
-          style={{ zIndex: 20, bottom: '32%', right: '8%', opacity: 0 }}
-        >
+        <div ref={pointer4Ref} className="absolute" style={{ zIndex: 20, bottom: '32%', right: '8%', opacity: 0 }}>
           <Hotspot
             title="Private Gardens"
             subtitle="Podium Level"
@@ -662,11 +616,7 @@ export function RevealZoom({
           />
         </div>
 
-        <div 
-          ref={textRef} 
-          className="absolute top-20 right-8 md:right-12 lg:right-16 xl:right-24" 
-          style={{ zIndex: 5, backfaceVisibility: 'hidden', opacity: 0 }}
-        >
+        <div ref={textRef} className="absolute top-20 right-8 md:right-12 lg:right-16 xl:right-24" style={{ zIndex: 5, opacity: 0 }}>
           <h2 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-tight drop-shadow-2xl">
             Where You're Always<br />
             In Your Element
@@ -681,7 +631,7 @@ export function RevealZoom({
             className="absolute inset-0 w-full h-full object-cover"
             style={{ 
               objectPosition: 'center center', 
-              transform: 'translateZ(0) scale(1)', 
+              transform: 'translateZ(0) scale(1)',
               willChange: 'transform, opacity',
               backfaceVisibility: 'hidden',
             }}
