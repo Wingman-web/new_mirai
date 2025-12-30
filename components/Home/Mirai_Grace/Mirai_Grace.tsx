@@ -97,9 +97,7 @@ export default function ImageScrollScrubber() {
       const dpr = window.devicePixelRatio || 1;
       canvas.width = window.innerWidth * dpr;
       canvas.height = window.innerHeight * dpr;
-      // Use setTransform to avoid cumulative scaling when resizing
-      const ctx = canvas.getContext('2d');
-      if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      canvas.getContext('2d')?.scale(dpr, dpr);
 
       // Create GSAP Timeline
       const tl = gsap.timeline({
@@ -118,16 +116,9 @@ export default function ImageScrollScrubber() {
       // Animate frame property from 0 to last index
       tl.to(frameObj.current, {
         frame: imagesRef.current.length - 1,
-        snap: 1, // Snap to whole numbers
+        snap: "frame", // Optional: snap to whole numbers
         ease: "none",
-        onUpdate: () => {
-          render();
-          // Debug: log frame updates when developing locally
-          if (process.env.NODE_ENV === 'development') {
-            // eslint-disable-next-line no-console
-            console.debug('Mirai_Grace frame:', Math.round(frameObj.current.frame));
-          }
-        }
+        onUpdate: render
       });
 
       // Initial render
@@ -142,9 +133,7 @@ export default function ImageScrollScrubber() {
       const dpr = window.devicePixelRatio || 1;
       canvas.width = window.innerWidth * dpr;
       canvas.height = window.innerHeight * dpr;
-      // Use setTransform to avoid cumulative scaling when resizing
-      const ctx = canvas.getContext('2d');
-      if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      canvas.getContext('2d')?.scale(dpr, dpr);
       render();
     };
 
