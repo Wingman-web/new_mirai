@@ -3,6 +3,8 @@ components/Home/Hero/mirai_home1.mov filter=lfs diff=lfs merge=lfs -text
 public/videos/mirai_home1.mov filter=lfs diff=lfs merge=lfs -text
 # Keep other large media in LFS, but store UI images in the repo so build systems receive real binaries
 public/images/* -filter -diff -merge -text
+# Make Mirai_Grace GIFs normal files (not LFS) so they are always present in the public folder
+public/components/Home/Mirai_Grace/*.gif -filter -diff -merge -text
 # Explicitly keep panorama and masterplan and animated GIF as normal blobs
 public/200m.jpg -filter -diff -merge -text
 public/master_plan.png -filter -diff -merge -text
