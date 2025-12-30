@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* Local font variables */
+:root {
+	--font-magra: 'Migra', serif;
+	--font-family-century: 'Century', 'Century Gothic', Arial, sans-serif;
+}
+
 /* Set site-wide font to Century Gothic (local font when available) */
 html, body {
 	/* Prevent horizontal scroll caused by overflowing children */
@@ -60,11 +66,22 @@ h3,h4,h5,h6{
 }
 
 @font-face {
-	font-family: 'Century-Gothic';
+	font-family: 'Migra';
+	font-style: normal;
+	font-weight: 800;
+	font-display: swap;
+	src: url('/fonts/migra/Migra-Extrabold.woff2') format('woff2'),
+		 url('/fonts/migra/Migra-Extrabold.woff') format('woff'),
+		 url('/fonts/migra/Migra-Extrabold.ttf') format('truetype'),
+		 url('/fonts/migra/Migra-Extrabold.otf') format('opentype');
+}
+
+@font-face {
+	font-family: 'Century';
 	font-style: normal;
 	font-weight: 300;
 	font-display: swap;
-	src: url('/fonts/century-gothic/SansSerifFLF/SansSerifFLF.otf') format('opentype');
+	src: url('/fonts/century/SansSerifFLF.otf') format('opentype');
 }
 
 .migra-heading {

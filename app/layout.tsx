@@ -1,24 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import localFont from 'next/font/local';
-
-const migra = localFont({
-  variable: '--font-magra',
-  src: [
-    { path: '../components/Fonts/migra/Migra-Extralight.woff2', weight: '100', style: 'normal' },
-    { path: '../components/Fonts/migra/Migra-Extrabold.woff2', weight: '800', style: 'normal' }
-  ],
-  display: 'swap'
-});
-
-const century = localFont({
-  variable: '--font-family-century',
-  src: [
-    { path: '../components/Fonts/century-gothic/SansSerifFLF/SansSerifFLF.otf', weight: '300', style: 'normal' },
-    { path: '../components/Fonts/century-gothic/SansSerifFLF/SansSerifBldFLF.otf', weight: '700', style: 'normal' }
-  ],
-  display: 'swap'
-});
 
 import NavContainer from "@/components/Home/Navbar/NavContainer";
 import LoadingOverlay from '@/components/Common/LoadingOverlay';
@@ -51,7 +32,7 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png" />
       </head>
-      <body className={`${migra.variable} ${century.variable} antialiased `}>
+      <body className="antialiased">
         {/* Server-rendered black overlay to show immediately during initial load */}
         <div id="initial-loading-overlay" className="fixed inset-0 bg-black z-9999 transition-opacity duration-500" />
         <NavContainer />
