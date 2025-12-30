@@ -1,17 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useCallback, useState, useLayoutEffect } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import type { StaticImageData } from 'next/image';
-
-// Register GSAP plugin
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
-
-// Use useLayoutEffect on client, useEffect on server
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 // Pointer hotspot component with hover expand effect
 interface HotspotProps {
@@ -30,7 +22,6 @@ function Hotspot({ title, subtitle, description, position }: HotspotProps) {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Circle with plus icon */}
       <div 
         className="relative z-20 flex items-center justify-center w-14 h-14 rounded-full cursor-pointer transition-all duration-500 ease-out shrink-0"
         style={{
@@ -39,23 +30,19 @@ function Hotspot({ title, subtitle, description, position }: HotspotProps) {
           boxShadow: isHovered ? '0 0 30px rgba(255,255,255,0.2)' : '0 0 20px rgba(0,0,0,0.5)',
         }}
       >
-        {/* Plus icon */}
         <svg 
           width="22" 
           height="22" 
           viewBox="0 0 24 24" 
           fill="none"
           className="transition-transform duration-500"
-          style={{
-            transform: isHovered ? 'rotate(45deg)' : 'rotate(0deg)',
-          }}
+          style={{ transform: isHovered ? 'rotate(45deg)' : 'rotate(0deg)' }}
         >
           <line x1="12" y1="5" x2="12" y2="19" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
           <line x1="5" y1="12" x2="19" y2="12" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
         </svg>
       </div>
       
-      {/* Title & Subtitle - Always visible */}
       <div 
         className={`flex flex-col justify-center transition-all duration-500 ${position === 'left' ? 'ml-4' : 'mr-4'}`}
         style={{
@@ -93,7 +80,6 @@ function Hotspot({ title, subtitle, description, position }: HotspotProps) {
         </p>
       </div>
       
-      {/* Expandable content panel - Shows on hover */}
       <div 
         className="overflow-hidden transition-all duration-500 ease-out"
         style={{
@@ -189,11 +175,9 @@ export function RevealZoom({
   const canvasCtxRef = useRef<CanvasRenderingContext2D | null>(null);
   const rafIdRef = useRef<number | null>(null);
   const needsDrawRef = useRef(false);
-  const isInitializedRef = useRef(false);
-  const hasRunInitialResetRef = useRef(false);
   
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [isReady, setIsReady] = useState(false);
+  const [userHasScrolled, setUserHasScrolled] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const imageRef = useRef<HTMLImageElement | null>(null);
   
@@ -209,102 +193,117 @@ export function RevealZoom({
   const resolvedShapeSrc = typeof shapeImage === 'string' ? shapeImage : shapeImage.src;
 
   // ============================================
-  // CRITICAL FIX: Aggressive scroll reset
-  // This runs BEFORE paint using useLayoutEffect
-  // ============================================
-  useIsomorphicLayoutEffect(() => {
-    if (typeof window === 'undefined' || hasRunInitialResetRef.current) return;
-    hasRunInitialResetRef.current = true;
-
-    // Immediately disable scroll restoration
-    if ('scrollRestoration' in window.history) {
-      window.history.scrollRestoration = 'manual';
-    }
-
-    // Kill ALL existing ScrollTriggers immediately
-    ScrollTrigger.getAll().forEach(st => st.kill());
-    ScrollTrigger.clearMatchMedia();
-    ScrollTrigger.clearScrollMemory();
-
-    // Force scroll to top using multiple methods
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-    
-    // Also try scrolling the wrapper if it exists
-    if (wrapperRef.current) {
-      wrapperRef.current.scrollTop = 0;
-    }
-
-    setIsMounted(true);
-  }, []);
-
-  // ============================================
-  // Second layer: useEffect for additional reset
-  // ============================================
-  useEffect(() => {
-    if (typeof window === 'undefined' || !isMounted) return;
-
-    // Reset animation state
-    animState.current = {
-      scale: 1,
-      panY: 0,
-      lastScale: -1,
-      lastPanY: -1,
-    };
-
-    // Double-check scroll position after a frame
-    const frameId = requestAnimationFrame(() => {
-      window.scrollTo(0, 0);
-      
-      // Now we're ready to initialize
-      const readyTimeout = setTimeout(() => {
-        setIsReady(true);
-      }, 150); // Slightly longer delay for Vercel CDN
-
-      return () => clearTimeout(readyTimeout);
-    });
-
-    return () => cancelAnimationFrame(frameId);
-  }, [isMounted]);
-
-  // ============================================
-  // Handle browser back/forward navigation
+  // STEP 1: Mount and force scroll to top
   // ============================================
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const handlePopState = () => {
-      // Reset on navigation
-      window.scrollTo(0, 0);
-      ScrollTrigger.refresh(true);
-    };
+    // Disable browser scroll restoration
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
 
-    const handleBeforeUnload = () => {
-      // Reset scroll before page unloads
+    // Force scroll to top immediately
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+
+    // Mark as mounted after scroll reset
+    setIsMounted(true);
+  }, []);
+
+  // ============================================
+  // STEP 2: Detect REAL user scroll (not browser restore)
+  // Only enable animations after user actually scrolls
+  // ============================================
+  useEffect(() => {
+    if (typeof window === 'undefined' || !isMounted) return;
+
+    let initialScrollY = window.scrollY;
+    let hasDetectedUserScroll = false;
+
+    // Wait a bit for any browser scroll restoration to settle
+    const initTimeout = setTimeout(() => {
+      // Reset scroll one more time
       window.scrollTo(0, 0);
+      initialScrollY = 0;
+
+      const handleScroll = () => {
+        // Only count as user scroll if:
+        // 1. We haven't already detected a user scroll
+        // 2. The scroll is moving DOWN (user initiated)
+        // 3. Some time has passed since page load
+        if (!hasDetectedUserScroll && window.scrollY > initialScrollY + 5) {
+          hasDetectedUserScroll = true;
+          setUserHasScrolled(true);
+          window.removeEventListener('scroll', handleScroll);
+        }
+      };
+
+      const handleWheel = () => {
+        // Wheel event is definitely user-initiated
+        if (!hasDetectedUserScroll) {
+          hasDetectedUserScroll = true;
+          setUserHasScrolled(true);
+          window.removeEventListener('wheel', handleWheel);
+          window.removeEventListener('scroll', handleScroll);
+        }
+      };
+
+      const handleTouchMove = () => {
+        // Touch is definitely user-initiated
+        if (!hasDetectedUserScroll) {
+          hasDetectedUserScroll = true;
+          setUserHasScrolled(true);
+          window.removeEventListener('touchmove', handleTouchMove);
+          window.removeEventListener('scroll', handleScroll);
+        }
+      };
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        // Arrow keys, Page Up/Down, Space, Home, End
+        const scrollKeys = ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Space', 'Home', 'End'];
+        if (scrollKeys.includes(e.code) && !hasDetectedUserScroll) {
+          hasDetectedUserScroll = true;
+          setUserHasScrolled(true);
+          window.removeEventListener('keydown', handleKeyDown);
+          window.removeEventListener('scroll', handleScroll);
+        }
+      };
+
+      window.addEventListener('scroll', handleScroll, { passive: true });
+      window.addEventListener('wheel', handleWheel, { passive: true });
+      window.addEventListener('touchmove', handleTouchMove, { passive: true });
+      window.addEventListener('keydown', handleKeyDown, { passive: true });
+
+    }, 300); // Wait 300ms for browser restore to settle
+
+    return () => {
+      clearTimeout(initTimeout);
     };
+  }, [isMounted]);
+
+  // ============================================
+  // Handle page show (back/forward cache)
+  // ============================================
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
 
     const handlePageShow = (event: PageTransitionEvent) => {
-      // Handle bfcache (back-forward cache)
       if (event.persisted) {
+        // Page was restored from bfcache
         window.scrollTo(0, 0);
-        ScrollTrigger.getAll().forEach(st => st.kill());
-        isInitializedRef.current = false;
-        setIsReady(false);
-        setTimeout(() => setIsReady(true), 100);
+        setUserHasScrolled(false);
+        
+        // Re-enable scroll detection
+        setTimeout(() => {
+          setUserHasScrolled(false);
+        }, 100);
       }
     };
 
-    window.addEventListener('popstate', handlePopState);
-    window.addEventListener('beforeunload', handleBeforeUnload);
     window.addEventListener('pageshow', handlePageShow);
-
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      window.removeEventListener('pageshow', handlePageShow);
-    };
+    return () => window.removeEventListener('pageshow', handlePageShow);
   }, []);
 
   const drawCanvas = useCallback(() => {
@@ -412,7 +411,9 @@ export function RevealZoom({
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
         setupCanvas();
-        ScrollTrigger.refresh();
+        if (userHasScrolled) {
+          ScrollTrigger.refresh();
+        }
       }, 100);
     };
     
@@ -421,22 +422,18 @@ export function RevealZoom({
       clearTimeout(resizeTimeout);
       window.removeEventListener('resize', handleResize);
     };
-  }, [setupCanvas, isMounted]);
+  }, [setupCanvas, isMounted, userHasScrolled]);
 
   // ============================================
-  // Main ScrollTrigger Animation Setup
+  // STEP 3: Initialize GSAP only AFTER user scrolls
   // ============================================
   useEffect(() => {
-    if (typeof window === 'undefined' || !imageLoaded || !isReady || !isMounted) return;
-    
-    // Prevent double initialization
-    if (isInitializedRef.current) return;
-    isInitializedRef.current = true;
+    if (typeof window === 'undefined' || !imageLoaded || !isMounted || !userHasScrolled) return;
 
-    // Final scroll reset before initializing
-    window.scrollTo(0, 0);
+    // Register plugin
+    gsap.registerPlugin(ScrollTrigger);
 
-    // Reset animation state to initial values
+    // Reset animation state
     animState.current = {
       scale: 1,
       panY: 0,
@@ -447,131 +444,115 @@ export function RevealZoom({
     // Clear any existing ScrollTriggers
     ScrollTrigger.getAll().forEach(st => st.kill());
     
-    // Delay initialization to ensure everything is settled
-    const initTimeout = setTimeout(() => {
-      // One more scroll reset
-      window.scrollTo(0, 0);
+    ctxRef.current = gsap.context(() => {
+      // Set initial states
+      gsap.set(textRef.current, { opacity: 0, y: 40, force3D: true });
+      gsap.set([pointer1Ref.current, pointer2Ref.current, pointer3Ref.current, pointer4Ref.current], { 
+        opacity: 0, 
+        scale: 0,
+        force3D: true
+      });
       
-      ctxRef.current = gsap.context(() => {
-        // Set initial states explicitly
-        gsap.set(textRef.current, { opacity: 0, y: 40, force3D: true });
-        gsap.set([pointer1Ref.current, pointer2Ref.current, pointer3Ref.current, pointer4Ref.current], { 
+      gsap.set(buildingRef.current, { force3D: true, scale: 1, opacity: 1 });
+      gsap.set(shapeRef.current, { force3D: true, opacity: 1 });
+      
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: wrapperRef.current,
+          start: "top top",
+          end: scrollDistance,
+          pin: true,
+          scrub: 0.5,
+          anticipatePin: 1,
+          fastScrollEnd: true,
+          preventOverlaps: true,
+          invalidateOnRefresh: true,
+        },
+      });
+
+      // PHASE 1: Building zoom
+      tl.to(buildingRef.current, {
+        scale: buildingZoomScale,
+        ease: "none",
+        duration: 8.0,
+      }, 0);
+      
+      tl.to(buildingRef.current, {
+        opacity: 0,
+        ease: "none",
+        duration: 2.5,
+      }, 5.5);
+      
+      // Shape disappears
+      tl.to(shapeRef.current, {
+        opacity: 0,
+        ease: "none",
+        duration: 3.0,
+      }, 0);
+
+      // PHASE 2: Text Entry
+      tl.to(textRef.current, {
+        opacity: 1,
+        y: 0,
+        ease: "none", 
+        duration: 0.8,
+      }, 1.5);
+
+      // PHASE 3: Canvas Zoom
+      tl.to(animState.current, {
+        scale: windowZoomScale,
+        duration: 2.0,
+        ease: "none", 
+        onUpdate: scheduleCanvasDraw,
+      }, 4.5);
+
+      // PHASE 4: Text Exit
+      tl.to(textRef.current, {
+        opacity: 0,
+        y: -30,
+        ease: "none",
+        duration: 0.5,
+      }, 6.0);
+
+      // PHASE 5: Canvas Pan
+      tl.to(animState.current, {
+        panY: windowMoveDistance,
+        duration: 4.5, 
+        ease: "none", 
+        onUpdate: scheduleCanvasDraw,
+      }, 6.5);
+
+      // Animate pointers
+      const animatePointer = (ref: React.RefObject<HTMLDivElement | null>, inT: number, outT: number) => {
+        tl.to(ref.current, { 
+          opacity: 1, 
+          scale: 1, 
+          ease: "none", 
+          duration: 0.6 
+        }, inT);
+        tl.to(ref.current, { 
           opacity: 0, 
-          scale: 0,
-          force3D: true
-        });
-        
-        gsap.set(buildingRef.current, { force3D: true, scale: 1, opacity: 1 });
-        gsap.set(shapeRef.current, { force3D: true, opacity: 1 });
-        
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: wrapperRef.current,
-            start: "top top",
-            end: scrollDistance,
-            pin: true,
-            scrub: 0.5, // Add slight smoothing
-            anticipatePin: 1,
-            fastScrollEnd: true,
-            preventOverlaps: true,
-            invalidateOnRefresh: true,
-            onRefresh: () => {
-              // Reset to start position on refresh
-              if (window.scrollY === 0) {
-                animState.current.scale = 1;
-                animState.current.panY = 0;
-                scheduleCanvasDraw();
-              }
-            },
-          },
-        });
-
-        // PHASE 1: Building zoom
-        tl.to(buildingRef.current, {
-          scale: buildingZoomScale,
-          ease: "none",
-          duration: 8.0,
-        }, 0);
-        
-        tl.to(buildingRef.current, {
-          opacity: 0,
-          ease: "none",
-          duration: 2.5,
-        }, 5.5);
-        
-        // Shape disappears
-        tl.to(shapeRef.current, {
-          opacity: 0,
-          ease: "none",
-          duration: 3.0,
-        }, 0);
-
-        // PHASE 2: Text Entry
-        tl.to(textRef.current, {
-          opacity: 1,
-          y: 0,
+          scale: 0.95, 
           ease: "none", 
-          duration: 0.8,
-        }, 1.5);
+          duration: 0.5 
+        }, outT);
+      };
 
-        // PHASE 3: Canvas Zoom
-        tl.to(animState.current, {
-          scale: windowZoomScale,
-          duration: 2.0,
-          ease: "none", 
-          onUpdate: scheduleCanvasDraw,
-        }, 4.5);
+      animatePointer(pointer1Ref, 6.8, 8.0);
+      animatePointer(pointer2Ref, 8.3, 9.5);
+      animatePointer(pointer3Ref, 9.8, 11.0);
+      animatePointer(pointer4Ref, 11.3, 12.5);
 
-        // PHASE 4: Text Exit
-        tl.to(textRef.current, {
-          opacity: 0,
-          y: -30,
-          ease: "none",
-          duration: 0.5,
-        }, 6.0);
+      // Refresh after setup
+      ScrollTrigger.refresh(true);
 
-        // PHASE 5: Canvas Pan
-        tl.to(animState.current, {
-          panY: windowMoveDistance,
-          duration: 4.5, 
-          ease: "none", 
-          onUpdate: scheduleCanvasDraw,
-        }, 6.5);
-
-        // Animate pointers
-        const animatePointer = (ref: React.RefObject<HTMLDivElement | null>, inT: number, outT: number) => {
-          tl.to(ref.current, { 
-            opacity: 1, 
-            scale: 1, 
-            ease: "none", 
-            duration: 0.6 
-          }, inT);
-          tl.to(ref.current, { 
-            opacity: 0, 
-            scale: 0.95, 
-            ease: "none", 
-            duration: 0.5 
-          }, outT);
-        };
-
-        animatePointer(pointer1Ref, 6.8, 8.0);
-        animatePointer(pointer2Ref, 8.3, 9.5);
-        animatePointer(pointer3Ref, 9.8, 11.0);
-        animatePointer(pointer4Ref, 11.3, 12.5);
-
-        // Final refresh after setup
-        ScrollTrigger.refresh(true);
-
-      }, wrapperRef);
-    }, 100);
+    }, wrapperRef);
 
     return () => {
-      clearTimeout(initTimeout);
       if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
       ctxRef.current?.revert();
-      isInitializedRef.current = false;
     };
-  }, [scrollDistance, buildingZoomScale, windowZoomScale, windowMoveDistance, scheduleCanvasDraw, imageLoaded, isReady, isMounted]);
+  }, [scrollDistance, buildingZoomScale, windowZoomScale, windowMoveDistance, scheduleCanvasDraw, imageLoaded, isMounted, userHasScrolled]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -581,7 +562,7 @@ export function RevealZoom({
     };
   }, []);
 
-  // Don't render anything until mounted to prevent hydration issues
+  // Show loading state until mounted
   if (!isMounted) {
     return (
       <section 
@@ -629,7 +610,7 @@ export function RevealZoom({
         <div 
           ref={pointer1Ref} 
           className="absolute"
-          style={{ zIndex: 20, top: '18%', left: '5%' }}
+          style={{ zIndex: 20, top: '18%', left: '5%', opacity: 0 }}
         >
           <Hotspot
             title="Penthouses"
@@ -643,7 +624,7 @@ export function RevealZoom({
         <div 
           ref={pointer2Ref} 
           className="absolute"
-          style={{ zIndex: 20, top: '22%', right: '5%' }}
+          style={{ zIndex: 20, top: '22%', right: '5%', opacity: 0 }}
         >
           <Hotspot
             title="Sky Lounge"
@@ -657,7 +638,7 @@ export function RevealZoom({
         <div 
           ref={pointer3Ref} 
           className="absolute"
-          style={{ zIndex: 20, bottom: '28%', left: '8%' }}
+          style={{ zIndex: 20, bottom: '28%', left: '8%', opacity: 0 }}
         >
           <Hotspot
             title="Wellness Spa"
@@ -671,7 +652,7 @@ export function RevealZoom({
         <div 
           ref={pointer4Ref} 
           className="absolute"
-          style={{ zIndex: 20, bottom: '32%', right: '8%' }}
+          style={{ zIndex: 20, bottom: '32%', right: '8%', opacity: 0 }}
         >
           <Hotspot
             title="Private Gardens"
@@ -684,7 +665,7 @@ export function RevealZoom({
         <div 
           ref={textRef} 
           className="absolute top-20 right-8 md:right-12 lg:right-16 xl:right-24" 
-          style={{ zIndex: 5, backfaceVisibility: 'hidden' }}
+          style={{ zIndex: 5, backfaceVisibility: 'hidden', opacity: 0 }}
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-tight drop-shadow-2xl">
             Where You're Always<br />
@@ -700,7 +681,7 @@ export function RevealZoom({
             className="absolute inset-0 w-full h-full object-cover"
             style={{ 
               objectPosition: 'center center', 
-              transform: 'translateZ(0)', 
+              transform: 'translateZ(0) scale(1)', 
               willChange: 'transform, opacity',
               backfaceVisibility: 'hidden',
             }}
