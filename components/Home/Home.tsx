@@ -26,7 +26,7 @@ const Home = () => {
           <RevealZoom />
         </section>
         <section aria-label="Scroll video" data-section="scroll-video" className="relative">
-          <ScrollVideoComponent />
+          {/* <ScrollVideoComponent /> */}
         </section>
         <MiraiPodsIntro />
         <MiraiPodsSlider />
