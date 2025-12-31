@@ -11,11 +11,13 @@ interface HotspotProps {
   subtitle: string;
   description: string;
   position: 'left' | 'right';
+  hideIconOnOpen?: boolean;
 }
 
-function Hotspot({ title, subtitle, description, position }: HotspotProps) {
+function Hotspot({ title, subtitle, description, position, hideIconOnOpen = false }: HotspotProps) {
   const [isHovered, setIsHovered] = useState(false);
-  
+  const shouldHideIcon = isHovered && hideIconOnOpen;
+
   return (
     <div 
       className={`flex items-center ${position === 'right' ? 'flex-row-reverse' : 'flex-row'}`}
@@ -28,6 +30,11 @@ function Hotspot({ title, subtitle, description, position }: HotspotProps) {
           backgroundColor: isHovered ? 'rgba(0, 0, 0, 0.7)' : 'rgba(0, 0, 0, 0.5)',
           border: '1.5px solid rgba(255, 255, 255, 0.5)',
           boxShadow: isHovered ? '0 0 30px rgba(255,255,255,0.2)' : '0 0 20px rgba(0,0,0,0.5)',
+          // Hide the icon when the description is open for right-positioned hotspots
+          // or when explicitly requested via hideIconOnOpen
+          opacity: (position === 'right' && isHovered) || shouldHideIcon ? 0 : 1,
+          pointerEvents: (position === 'right' && isHovered) || shouldHideIcon ? 'none' : 'auto',
+          transform: (position === 'right' && isHovered) || shouldHideIcon ? 'translateX(8px) scale(0.92)' : 'none',
         }}
       >
         <svg 
@@ -44,12 +51,11 @@ function Hotspot({ title, subtitle, description, position }: HotspotProps) {
       </div>
       
       <div 
-        className={`flex flex-col justify-center transition-all duration-500 ${position === 'left' ? 'ml-4' : 'mr-4'}`}
+        className={`flex flex-col justify-center transition-all duration-300 ${position === 'left' ? 'ml-4' : 'mr-4'}`}
         style={{
           opacity: isHovered ? 0 : 1,
-          transform: isHovered ? 'translateX(20px)' : 'translateX(0)',
-          position: isHovered ? 'absolute' : 'relative',
-          pointerEvents: isHovered ? 'none' : 'auto',
+          transform: isHovered ? 'translateX(12px)' : 'translateX(0)',
+          willChange: 'transform, opacity',
         }}
       >
         <h3 style={{
@@ -77,7 +83,7 @@ function Hotspot({ title, subtitle, description, position }: HotspotProps) {
       </div>
       
       <div 
-        className="overflow-hidden transition-all duration-500 ease-out"
+        className="overflow-hidden transition-all duration-300 ease-out"
         style={{
           maxWidth: isHovered ? '350px' : '0px',
           opacity: isHovered ? 1 : 0,
@@ -85,6 +91,8 @@ function Hotspot({ title, subtitle, description, position }: HotspotProps) {
           marginRight: position === 'right' ? '-10px' : '0',
           paddingLeft: position === 'left' ? '20px' : '0',
           paddingRight: position === 'right' ? '20px' : '0',
+          pointerEvents: 'auto',
+          willChange: 'max-width, opacity',
         }}
       >
         <div 
@@ -480,7 +488,8 @@ export function RevealZoom({
 
     animatePointer(pointer1Ref, 6.8, 8.0);
     animatePointer(pointer2Ref, 8.3, 9.5);
-    animatePointer(pointer3Ref, 9.8, 11.0);
+    // Make Wellness Spa disappear a bit earlier
+    animatePointer(pointer3Ref, 9.8, 10.5);
     animatePointer(pointer4Ref, 11.3, 12.5);
 
     // Store last valid progress to prevent jumps
@@ -580,39 +589,42 @@ export function RevealZoom({
           style={{ zIndex: 1, backgroundColor: '#000' }} 
         />
 
-        <div ref={pointer1Ref} className="absolute" style={{ zIndex: 20, top: '18%', left: '5%', opacity: 0 }}>
+        <div ref={pointer1Ref} className="absolute" style={{ zIndex: 20, top: '18%', left: '10%', opacity: 0 }}>
           <Hotspot
-            title="Penthouses"
+            title="SkyPods"
             subtitle="Floors 29-32"
-            description="The top floors of the Mirai building are a collection of 16 exclusive penthouses. Your life will unfold 100 metres above the ground: this is what the elite Club 100 membership reflects."
-            position="left"
+            description="The top floors of the Mirai building are a collection of 16 exclusive SkyPods. Your life will unfold 100 metres above the ground: this is what the elite Club 100 membership reflects."
+            position="right" // icon on the right, text on the left
           />
         </div>
 
-        <div ref={pointer2Ref} className="absolute" style={{ zIndex: 20, top: '22%', right: '5%', opacity: 0 }}>
+        <div ref={pointer2Ref} className="absolute" style={{ zIndex: 20, top: '22%', right: '30%', opacity: 0 }}>
           <Hotspot
-            title="Sky Lounge"
+            title="Residencies"
             subtitle="Level 35 - Rooftop"
             description="An exclusive rooftop sanctuary featuring panoramic 360-degree views of the city skyline. The perfect setting for private events, sunset cocktails, and unforgettable moments above the clouds."
-            position="right"
+            position="left" // icon on the left, text on the right
+            hideIconOnOpen={true}
           />
         </div>
 
-        <div ref={pointer3Ref} className="absolute" style={{ zIndex: 20, bottom: '28%', left: '8%', opacity: 0 }}>
+        <div ref={pointer3Ref} className="absolute" style={{ zIndex: 20, bottom: '48%', right: '30%', opacity: 0 }}>
           <Hotspot
-            title="Wellness Spa"
+            title="Clubehouse"
             subtitle="Levels 3-4"
             description="A world-class wellness destination spanning two floors. Featuring infinity pools, Turkish hammam, cryotherapy chambers, and private treatment suites designed by award-winning architects."
             position="left"
+            hideIconOnOpen={true}
           />
         </div>
 
-        <div ref={pointer4Ref} className="absolute" style={{ zIndex: 20, bottom: '32%', right: '8%', opacity: 0 }}>
+        <div ref={pointer4Ref} className="absolute" style={{ zIndex: 20, bottom: '50%', left: '8%', opacity: 0 }}>
           <Hotspot
-            title="Private Gardens"
+            title="Podium Level"
             subtitle="Podium Level"
             description="Landscaped terraces and secret gardens create tranquil retreats within the urban landscape. Native flora, water features, and meditation pavilions offer an escape from city life."
             position="right"
+            hideIconOnOpen={true}
           />
         </div>
 

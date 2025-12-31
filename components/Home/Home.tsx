@@ -1,7 +1,7 @@
 import React from 'react'
 import Hero from './Hero/Hero'
 import { RevealZoom } from './Gateway/Gateway' 
-import ScrollVideoComponent from './Mirai_Grace/Mirai_Grace'
+import Mirai_Grace from './Mirai_Grace/Mirai_Grace'
 import MiraiPodsIntro from './4_Pods/4_pods'
 import MiraiPodsSlider from './Mirai_Pods_Slider/Pods_Slider'
 import ClubhouseIntro from './4_Level_Clubhouse/4_Level_Clubhouse'
@@ -26,7 +26,7 @@ const Home = () => {
           <RevealZoom />
         </section>
         <section aria-label="Scroll video" data-section="scroll-video" className="relative">
-          <ScrollVideoComponent />
+          <Mirai_Grace />
         </section>
         <MiraiPodsIntro />
         <MiraiPodsSlider />
