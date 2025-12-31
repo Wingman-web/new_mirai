@@ -139,7 +139,7 @@ export default function ImageScrollScrubber() {
       const st = (tl as any).scrollTrigger;
       if (st) console.log('Mirai_Grace timeline.scrollTrigger', { start: st.start, end: st.end, pin: !!st.pin });
 
-      // Create a debug ScrollTrigger to report progress and update the overlay
+      // Create a debug ScrollTrigger to report progress, update the overlay, and as a fallback map progress -> frame
       ScrollTrigger.create({
         trigger: sectionRef.current,
         start: "top top",
@@ -147,6 +147,15 @@ export default function ImageScrollScrubber() {
         onUpdate(self) {
           console.log('Mirai_Grace ST progress', self.progress);
           if (debugRef.current) debugRef.current.textContent = `frame:${lastFrameRef.current ?? 0} progress:${self.progress.toFixed(2)}`;
+
+          // Fallback: compute frame directly from progress and force render so visual updates during scroll are immediate
+          const last = lastFrameRef.current ?? 0;
+          const frameFromProgress = Math.round(self.progress * (imagesRef.current.length - 1));
+          if (frameFromProgress !== last) {
+            frameObj.current.frame = frameFromProgress;
+            console.log('Mirai_Grace fallback set frame', frameFromProgress);
+            render();
+          }
         }
       });
 
