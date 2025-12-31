@@ -119,10 +119,10 @@ export default function ImageScrollScrubber() {
         }
       });
 
-      // Animate frame property from 0 to last index
+      // Reset frame to 0 and animate frame property from 0 to last index
+      frameObj.current.frame = 0;
       tl.to(frameObj.current, {
         frame: imagesRef.current.length - 1,
-        snap: { frame: 1 }, // Snap 'frame' property to whole numbers
         ease: "none",
         onUpdate: render
       });
@@ -130,6 +130,11 @@ export default function ImageScrollScrubber() {
       // Ensure ScrollTrigger is aware of the new pin/size after images are loaded
       ScrollTrigger.refresh();
       console.log('Mirai_Grace GSAP init', imagesRef.current.length);
+
+      // Debug: log all ScrollTriggers and the timeline's scrollTrigger
+      console.log('Mirai_Grace ScrollTriggers:', ScrollTrigger.getAll().map(s => ({ start: s.start, end: s.end, trigger: s.trigger })));
+      const st = (tl as any).scrollTrigger;
+      if (st) console.log('Mirai_Grace timeline.scrollTrigger', { start: st.start, end: st.end, pin: !!st.pin });
 
       // Initial render
       render();
