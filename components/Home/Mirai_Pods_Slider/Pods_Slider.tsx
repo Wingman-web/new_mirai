@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import gsap from 'gsap';
+
 const SKY_PODS = '/images/Sky_Pods.png';
 const TERRA_IMG = '/images/terra.png';
 const AQUA_IMG = '/images/aqua.png';
@@ -16,301 +18,557 @@ interface Slide {
 }
 
 const slides: Slide[] = [
-  {
-    id: 0,
-    image: SKY_PODS,
-    label: 'Sky Pods',
-    title: 'An Elemental Rooftop\nwith Four Sky Pods'
-  },
-
-  {
-    id: 1,
-    image: TERRA_IMG,
-    label: 'Terra Pod',
-    title: 'Here, Stories\nGrow Roots'
-  },
-
-  {
-    id: 2,
-    image: AQUA_IMG,
-    label: 'Aqua Pod',
-    title: 'Where Water\nMeets Wonder'
-  },
-
-  {
-    id: 3,
-    image: PYRO_IMG,
-    label: 'Pyro Pod',
-    title: 'Ignite Your\nPassion'
-  },
-
-  {
-    id: 4,
-    image: AVIA_IMG,
-    label: 'Avia Pod',
-    title: 'Soaring Above\nthe Ordinary'
-  }
+  { id: 0, image: SKY_PODS, label: 'Sky Pods', title: 'An Elemental Rooftop\nwith Four Sky Pods' },
+  { id: 1, image: TERRA_IMG, label: 'Terra Pod', title: 'Here, Stories\nGrow Roots' },
+  { id: 2, image: AQUA_IMG, label: 'Aqua Pod', title: 'Where Water\nMeets Wonder' },
+  { id: 3, image: PYRO_IMG, label: 'Pyro Pod', title: 'Ignite Your\nPassion' },
+  { id: 4, image: AVIA_IMG, label: 'Avia Pod', title: 'Soaring Above\nthe Ordinary' },
 ];
 
 export default function MiraiPodsSlider() {
-  const sectionRef = useRef<HTMLElement | null>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [layerAIndex, setLayerAIndex] = useState(0);
+  const [layerBIndex, setLayerBIndex] = useState(1);
+  const [activeLayer, setActiveLayer] = useState<'A' | 'B'>('A');
   const [isAnimating, setIsAnimating] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-  // Use browser-friendly timer type so clearInterval works reliably
-  const autoPlayRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const createdAtRef = useRef<number>(Date.now());
-  const touchStartRef = useRef<number>(0);
+  const [showContent, setShowContent] = useState(true);
 
-  // Reset effect moved below start/stop definitions (kept there only once)
+  const frameRef = useRef<HTMLDivElement>(null);
+  const thumbWrapperRef = useRef<HTMLDivElement>(null);
+  const prevThumbWrapperRef = useRef<HTMLDivElement>(null);
+  const thumbRef = useRef<HTMLDivElement>(null);
+  const prevThumbRef = useRef<HTMLDivElement>(null);
+  const layerARef = useRef<HTMLDivElement>(null);
+  const layerBRef = useRef<HTMLDivElement>(null);
+  const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
 
-  const stopAutoPlay = useCallback(() => {
-    if (autoPlayRef.current) {
-      clearInterval(autoPlayRef.current);
-      autoPlayRef.current = null;
-    }
+  const getNextIdx = (i: number) => (i + 1) % slides.length;
+  const getPrevIdx = (i: number) => (i - 1 + slides.length) % slides.length;
+
+  const currentIndex = activeLayer === 'A' ? layerAIndex : layerBIndex;
+  const nextIndex = getNextIdx(currentIndex);
+  const prevIndex = getPrevIdx(currentIndex);
+
+  useEffect(() => {
+    return () => {
+      if (autoPlayRef.current) clearInterval(autoPlayRef.current);
+      gsap.killTweensOf('*');
+    };
   }, []);
 
-  // startAutoPlay accepts an optional force flag to ignore user pause
-  const startAutoPlay = useCallback((force = false) => {
-    stopAutoPlay();
-    if (!isPaused || force) {
-      autoPlayRef.current = setInterval(() => {
-        setCurrentIndex((prev) => (prev < slides.length - 1 ? prev + 1 : 0));
-      }, 3000);
-    }
-  }, [isPaused, stopAutoPlay]);
+  const goToNext = () => {
+    if (isAnimating) return;
 
-  // Reset slider to first image when the section enters the viewport (every time)
-  useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
+    const thumb = thumbRef.current;
+    const thumbWrapper = thumbWrapperRef.current;
+    const prevThumbWrapper = prevThumbWrapperRef.current;
+    const frame = frameRef.current;
+    const incomingLayer = activeLayer === 'A' ? layerBRef.current : layerARef.current;
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          stopAutoPlay();
-          setCurrentIndex(0);
-          // Force restart even if the slider was paused by the user
-          startAutoPlay(true);
-        }
-      },
-      { root: null, threshold: 0.45 }
-    );
+    if (!thumb || !frame || !thumbWrapper || !incomingLayer || !prevThumbWrapper) return;
 
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [startAutoPlay, stopAutoPlay]);
-
-  const goToSlide = useCallback((index: number) => {
-    if (isAnimating || index === currentIndex) return;
     setIsAnimating(true);
-    setCurrentIndex(index);
-    setTimeout(() => setIsAnimating(false), 800);
-  }, [isAnimating, currentIndex]);
+    setShowContent(false);
 
-  const prev = useCallback(() => {
-    if (currentIndex > 0) {
-      goToSlide(currentIndex - 1);
+    if (activeLayer === 'A') {
+      setLayerBIndex(nextIndex);
+    } else {
+      setLayerAIndex(nextIndex);
     }
-  }, [currentIndex, goToSlide]);
 
-  const next = useCallback(() => {
-    goToSlide(currentIndex < slides.length - 1 ? currentIndex + 1 : 0);
-  }, [currentIndex, goToSlide]);
+    const thumbRect = thumb.getBoundingClientRect();
+    const frameRect = frame.getBoundingClientRect();
 
+    const scaleX = thumbRect.width / frameRect.width;
+    const offsetX = thumbRect.left - frameRect.left;
+    const offsetY = thumbRect.top - frameRect.top;
+
+    gsap.to([thumbWrapper, prevThumbWrapper], {
+      opacity: 0,
+      duration: 0.15,
+      ease: 'power2.out',
+    });
+
+    gsap.set(incomingLayer, {
+      zIndex: 10,
+      transformOrigin: 'top left',
+      scale: scaleX,
+      x: offsetX,
+      y: offsetY,
+      borderRadius: 8,
+    });
+
+    gsap.to(incomingLayer, {
+      scale: 1,
+      x: 0,
+      y: 0,
+      borderRadius: 0,
+      duration: 0.6,
+      ease: 'power2.inOut',
+      onComplete: () => {
+        const newActiveLayer = activeLayer === 'A' ? 'B' : 'A';
+        setActiveLayer(newActiveLayer);
+
+        const oldLayer = activeLayer === 'A' ? layerARef.current : layerBRef.current;
+        if (oldLayer) {
+          gsap.set(oldLayer, {
+            zIndex: 1,
+            scale: 1,
+            x: 0,
+            y: 0,
+            borderRadius: 0,
+          });
+        }
+
+        gsap.set(incomingLayer, {
+          zIndex: 5,
+        });
+
+        gsap.to([thumbWrapper, prevThumbWrapper], {
+          opacity: 1,
+          duration: 0.25,
+          ease: 'power2.out',
+        });
+
+        setShowContent(true);
+        setIsAnimating(false);
+      },
+    });
+  };
+
+  const goToPrev = () => {
+    if (isAnimating || currentIndex === 0) return;
+
+    const prevThumb = prevThumbRef.current;
+    const thumbWrapper = thumbWrapperRef.current;
+    const prevThumbWrapper = prevThumbWrapperRef.current;
+    const frame = frameRef.current;
+    const incomingLayer = activeLayer === 'A' ? layerBRef.current : layerARef.current;
+
+    if (!prevThumb || !frame || !thumbWrapper || !incomingLayer || !prevThumbWrapper) return;
+
+    setIsAnimating(true);
+    setShowContent(false);
+
+    if (activeLayer === 'A') {
+      setLayerBIndex(prevIndex);
+    } else {
+      setLayerAIndex(prevIndex);
+    }
+
+    const thumbRect = prevThumb.getBoundingClientRect();
+    const frameRect = frame.getBoundingClientRect();
+
+    const scaleX = thumbRect.width / frameRect.width;
+    const offsetX = thumbRect.left - frameRect.left;
+    const offsetY = thumbRect.top - frameRect.top;
+
+    gsap.to([thumbWrapper, prevThumbWrapper], {
+      opacity: 0,
+      duration: 0.15,
+      ease: 'power2.out',
+    });
+
+    gsap.set(incomingLayer, {
+      zIndex: 10,
+      transformOrigin: 'top left',
+      scale: scaleX,
+      x: offsetX,
+      y: offsetY,
+      borderRadius: 8,
+    });
+
+    gsap.to(incomingLayer, {
+      scale: 1,
+      x: 0,
+      y: 0,
+      borderRadius: 0,
+      duration: 0.6,
+      ease: 'power2.inOut',
+      onComplete: () => {
+        const newActiveLayer = activeLayer === 'A' ? 'B' : 'A';
+        setActiveLayer(newActiveLayer);
+
+        const oldLayer = activeLayer === 'A' ? layerARef.current : layerBRef.current;
+        if (oldLayer) {
+          gsap.set(oldLayer, {
+            zIndex: 1,
+            scale: 1,
+            x: 0,
+            y: 0,
+            borderRadius: 0,
+          });
+        }
+
+        gsap.set(incomingLayer, {
+          zIndex: 5,
+        });
+
+        gsap.to([thumbWrapper, prevThumbWrapper], {
+          opacity: 1,
+          duration: 0.25,
+          ease: 'power2.out',
+        });
+
+        setShowContent(true);
+        setIsAnimating(false);
+      },
+    });
+  };
+
+  // Autoplay
   useEffect(() => {
-    startAutoPlay();
-    return () => stopAutoPlay();
-  }, [startAutoPlay, stopAutoPlay]);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') {
-        stopAutoPlay();
-        prev();
-        startAutoPlay();
-      } else if (e.key === 'ArrowRight') {
-        stopAutoPlay();
-        next();
-        startAutoPlay();
+    autoPlayRef.current = setInterval(() => {
+      if (!isAnimating) {
+        goToNext();
       }
+    }, 4000);
+
+    return () => {
+      if (autoPlayRef.current) clearInterval(autoPlayRef.current);
     };
+  }, [currentIndex, isAnimating, activeLayer]);
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [prev, next, startAutoPlay, stopAutoPlay]);
-
-  const handleMouseEnter = () => {
-    if (Date.now() - createdAtRef.current > 500) {
-      setIsPaused(true);
-      stopAutoPlay();
-    }
-  };
-
-  const handleMouseLeave = () => {
-    setIsPaused(false);
-    startAutoPlay();
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartRef.current = e.changedTouches[0].screenX;
-    setIsPaused(true);
-    stopAutoPlay();
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    const touchEnd = e.changedTouches[0].screenX;
-    const diff = touchStartRef.current - touchEnd;
-    
-    if (Math.abs(diff) > 50) {
-      if (diff > 0) next();
-      else prev();
-    }
-    
-    setIsPaused(false);
-    startAutoPlay();
-  };
+  // Keyboard
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight') goToNext();
+      if (e.key === 'ArrowLeft') goToPrev();
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [currentIndex, isAnimating, activeLayer]);
 
   return (
-    <section 
-      ref={sectionRef}
-      className="relative w-full h-screen overflow-hidden bg-black"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
+    <section
+      style={{
+        position: 'relative',
+        width: '100%',
+        height: '100vh',
+        overflow: 'hidden',
+        background: '#000',
+      }}
     >
-      {/* Slider Container */}
-      <div className="relative w-full h-screen">
-        {/* Slides */}
-        <div className="relative w-full h-screen overflow-hidden">
-          <div 
-            className="flex h-screen transition-none"
-            style={{ 
-              transform: `translateX(-${currentIndex * 100}%)`,
-              willChange: 'transform'
+      {/* Main Frame */}
+      <div
+        ref={frameRef}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          overflow: 'hidden',
+        }}
+      >
+        {/* Layer A */}
+        <div
+          ref={layerARef}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: activeLayer === 'A' ? 5 : 1,
+            overflow: 'hidden',
+            willChange: 'transform',
+          }}
+        >
+          <img
+            src={slides[layerAIndex].image}
+            alt={slides[layerAIndex].label}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              display: 'block',
             }}
-          >
-            {slides.map((slide, index) => (
-              <div
-                key={slide.id}
-                className={`relative min-w-full w-full h-screen shrink-0 overflow-hidden transition-opacity duration-800 ease-in-out ${
-                  index === currentIndex ? 'opacity-100' : 'opacity-0'
-                }`}
-              >
-                {/* Gradient Overlay */}
-                <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/60 to-transparent z-1" />
-                
-                {/* Image */}
-                <img
-                  src={slide.image}
-                  alt={slide.label}
-                  className={`absolute inset-0 w-full h-full object-cover transition-transform duration-1200 ease-out ${
-                    index === currentIndex ? 'scale-100' : 'scale-105'
-                  }`}
-                />
-
-                {/* Content Overlay */}
-                <div 
-                  className={`absolute bottom-20 left-8 md:left-15 z-10 text-white max-w-125 transition-opacity duration-800 ease-out ${
-                    index === currentIndex ? 'opacity-100 delay-400' : 'opacity-0'
-                  }`}
-                >
-                  <div 
-                    className={`text-[13px] tracking-[2px] uppercase font-normal mb-5 font-sans text-white/80 transition-all duration-600 ease-out ${
-                      index === currentIndex ? 'opacity-100 translate-y-0 delay-500' : 'opacity-0 translate-y-5'
-                    }`}
-                  >
-                    {slide.label}
-                  </div>
-                  <h2 
-                    className={`text-[42px] md:text-[52px] font-light leading-[1.2] tracking-[-0.5px] whitespace-pre-line transition-all duration-700 ease-out ${
-                      index === currentIndex ? 'opacity-100 translate-y-0 delay-600' : 'opacity-0 translate-y-5'
-                    }`}
-                    style={{ fontFamily: 'Georgia, "Playfair Display", serif' }}
-                  >
-                    {slide.title}
-                  </h2>
-                </div>
-              </div>
-            ))}
-          </div>
+          />
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.2) 50%, transparent)',
+            }}
+          />
         </div>
 
-        {/* Navigation Arrows */}
-        <button
-          onClick={() => {
-            stopAutoPlay();
-            prev();
-            startAutoPlay();
+        {/* Layer B */}
+        <div
+          ref={layerBRef}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: activeLayer === 'B' ? 5 : 1,
+            overflow: 'hidden',
+            willChange: 'transform',
           }}
-          disabled={currentIndex === 0}
-          className="absolute left-6 top-1/2 -translate-y-1/2 bg-white/10 backdrop-blur-md text-white border border-white/20 w-12 h-12 rounded-full flex items-center justify-center text-xl z-20 transition-all duration-300 opacity-0 hover:opacity-80 hover:bg-white/20 hover:scale-110 disabled:opacity-20 disabled:cursor-not-allowed group-hover:opacity-80"
-          aria-label="Previous"
         >
-          ‹
-        </button>
-
-        <button
-          onClick={() => {
-            stopAutoPlay();
-            next();
-            startAutoPlay();
-          }}
-          className="absolute right-6 top-1/2 -translate-y-1/2 bg-white/10 backdrop-blur-md text-white border border-white/20 w-12 h-12 rounded-full flex items-center justify-center text-xl z-20 transition-all duration-300 opacity-0 hover:opacity-80 hover:bg-white/20 hover:scale-110 group-hover:opacity-80"
-          aria-label="Next"
-        >
-          ›
-        </button>
-      </div>
-
-      {/* Thumbnail Navigation */}
-      <div className="absolute bottom-20 right-8 md:right-15 z-15 flex flex-row gap-3 opacity-100 translate-y-0 transition-all duration-600 ease-in-out delay-400">
-        {slides.map((slide, index) => (
-          <div
-            key={slide.id}
-            onClick={() => {
-              stopAutoPlay();
-              goToSlide(index);
-              startAutoPlay();
+          <img
+            src={slides[layerBIndex].image}
+            alt={slides[layerBIndex].label}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              display: 'block',
             }}
-            className={`w-17.5 md:w-35 h-12.5 md:h-22.5 rounded overflow-hidden cursor-pointer relative transition-all duration-400 ease-out border-2 hover:scale-105 hover:border-white/60 ${
-              index === currentIndex 
-                ? 'border-white shadow-[0_4px_16px_rgba(0,0,0,0.5)]' 
-                : 'border-transparent'
-            }`}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.2) 50%, transparent)',
+            }}
+          />
+        </div>
+
+        {/* Content - Centered horizontally, aligned with thumbnails at bottom */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 80,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            color: '#fff',
+            textAlign: 'center',
+            opacity: showContent ? 1 : 0,
+            transition: 'opacity 0.4s ease',
+            transitionDelay: showContent ? '0.25s' : '0s',
+            zIndex: 20,
+          }}
+        >
+          <p
+            style={{
+              fontSize: 13,
+              letterSpacing: 3,
+              textTransform: 'uppercase',
+              marginBottom: 16,
+              opacity: 0.85,
+            }}
           >
-            <img
-              src={slide.image}
-              alt={slide.label}
-              className="w-full h-full object-cover"
-            />
-            <div 
-              className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ${
-                index === currentIndex ? 'opacity-0' : 'opacity-100'
-              }`}
-            />
-          </div>
-        ))}
+            {slides[currentIndex].label}
+          </p>
+          <h2
+            style={{
+              fontSize: 'clamp(36px, 5vw, 52px)',
+              fontWeight: 300,
+              lineHeight: 1.15,
+              whiteSpace: 'pre-line',
+              fontFamily: 'Georgia, serif',
+              margin: 0,
+            }}
+          >
+            {slides[currentIndex].title}
+          </h2>
+        </div>
       </div>
 
-      {/* Hover trigger for arrows */}
-      <style jsx>{`
-        section:hover button[aria-label="Previous"]:not(:disabled),
-        section:hover button[aria-label="Next"] {
-          opacity: 0.8;
-        }
-      `}</style>
+      {/* Prev Button */}
+      <button
+        onClick={goToPrev}
+        disabled={currentIndex === 0}
+        style={{
+          position: 'absolute',
+          left: 24,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          width: 50,
+          height: 50,
+          borderRadius: '50%',
+          border: '1px solid rgba(255,255,255,0.3)',
+          background: 'rgba(255,255,255,0.1)',
+          color: '#fff',
+          fontSize: 24,
+          cursor: currentIndex === 0 ? 'not-allowed' : 'pointer',
+          opacity: currentIndex === 0 ? 0.3 : 0.8,
+          zIndex: 30,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backdropFilter: 'blur(4px)',
+        }}
+      >
+        ‹
+      </button>
 
-      {/* Decorative shape scoped to the component: centered and scaled so full image is visible */}
+      {/* Next Button */}
+      <button
+        onClick={goToNext}
+        style={{
+          position: 'absolute',
+          right: 24,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          width: 50,
+          height: 50,
+          borderRadius: '50%',
+          border: '1px solid rgba(255,255,255,0.3)',
+          background: 'rgba(255,255,255,0.1)',
+          color: '#fff',
+          fontSize: 24,
+          cursor: 'pointer',
+          opacity: 0.8,
+          zIndex: 30,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backdropFilter: 'blur(4px)',
+        }}
+      >
+        ›
+      </button>
+
+      {/* Previous Thumbnail (Left Side) */}
+      <div
+        ref={prevThumbWrapperRef}
+        style={{
+          position: 'absolute',
+          bottom: 80,
+          left: 40,
+          zIndex: 40,
+          opacity: currentIndex === 0 ? 0 : 1,
+          pointerEvents: currentIndex === 0 ? 'none' : 'auto',
+          transition: 'opacity 0.3s ease',
+        }}
+      >
+        <div
+          ref={prevThumbRef}
+          style={{
+            width: 180,
+            height: 110,
+            borderRadius: 8,
+            overflow: 'hidden',
+            border: '2px solid rgba(255,255,255,0.5)',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+            position: 'relative',
+          }}
+        >
+          <img
+            src={slides[prevIndex]?.image || slides[0].image}
+            alt={slides[prevIndex]?.label || slides[0].label}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              display: 'block',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent 60%)',
+              display: 'flex',
+              alignItems: 'flex-end',
+              padding: 10,
+            }}
+          >
+            <span
+              style={{
+                color: '#fff',
+                fontSize: 10,
+                textTransform: 'uppercase',
+                letterSpacing: 2,
+              }}
+            >
+              {slides[prevIndex]?.label || slides[0].label}
+            </span>
+          </div>
+        </div>
+        <div style={{ textAlign: 'center', marginTop: 12 }}>
+          <span
+            style={{
+              color: 'rgba(255,255,255,0.5)',
+              fontSize: 9,
+              textTransform: 'uppercase',
+              letterSpacing: 3,
+            }}
+          >
+            Previous
+          </span>
+        </div>
+      </div>
+
+      {/* Next Thumbnail (Right Side) */}
+      <div
+        ref={thumbWrapperRef}
+        style={{
+          position: 'absolute',
+          bottom: 80,
+          right: 40,
+          zIndex: 40,
+        }}
+      >
+        <div
+          ref={thumbRef}
+          style={{
+            width: 180,
+            height: 110,
+            borderRadius: 8,
+            overflow: 'hidden',
+            border: '2px solid rgba(255,255,255,0.5)',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+            position: 'relative',
+          }}
+        >
+          <img
+            src={slides[nextIndex].image}
+            alt={slides[nextIndex].label}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              display: 'block',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent 60%)',
+              display: 'flex',
+              alignItems: 'flex-end',
+              padding: 10,
+            }}
+          >
+            <span
+              style={{
+                color: '#fff',
+                fontSize: 10,
+                textTransform: 'uppercase',
+                letterSpacing: 2,
+              }}
+            >
+              {slides[nextIndex].label}
+            </span>
+          </div>
+        </div>
+        <div style={{ textAlign: 'center', marginTop: 12 }}>
+          <span
+            style={{
+              color: 'rgba(255,255,255,0.5)',
+              fontSize: 9,
+              textTransform: 'uppercase',
+              letterSpacing: 3,
+            }}
+          >
+            Up Next
+          </span>
+        </div>
+      </div>
+
+      {/* Decorative Shape */}
       <img
         src={SHAPE_TWO_PODS}
         alt=""
-        aria-hidden="true"
-        className="absolute -top-2 left-1/2 -translate-x-1/2 w-screen max-w-1250 md:max-w-1050 lg:max-w-1250 max-h-screen h-auto object-contain pointer-events-none select-none z-0 opacity-100 drop-shadow-2xl"
+        style={{
+          position: 'absolute',
+          top: -8,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '100vw',
+          maxWidth: 1250,
+          height: 'auto',
+          pointerEvents: 'none',
+          zIndex: 0,
+          opacity: 0.9,
+        }}
       />
-
     </section>
   );
 }
