@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Image from 'next/image';
+import gsap from 'gsap';
+
 const shapeTwoPath = '/images/shape-two-pods.png';
 
 interface Amenity {
@@ -71,69 +73,226 @@ const levels: Level[] = [
 ];
 
 export default function MiraiClubhouse() {
-  const [globalBg, setGlobalBg] = useState(levels[0].defaultImage);
   const [activeLevel, setActiveLevel] = useState<number | null>(null);
+  
+  const bgLayer1Ref = useRef<HTMLDivElement>(null);
+  const bgLayer2Ref = useRef<HTMLDivElement>(null);
+  const levelPanelsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const activeLayerRef = useRef<1 | 2>(1);
+  const currentImageRef = useRef<string>('/clubhouse.png');
+  const timelineRef = useRef<gsap.core.Timeline | null>(null);
+
+  // Preload images for smoother transitions
+  useEffect(() => {
+    const allImages = [
+      '/clubhouse.png',
+      ...levels.flatMap(level => [level.defaultImage, ...level.amenities.map(a => a.image)])
+    ];
+    
+    // Preload all images in background
+    allImages.forEach(src => {
+      const img = new window.Image();
+      img.src = src;
+    });
+
+    // Initialize both transition layers as hidden (default bg shows through)
+    if (bgLayer1Ref.current) {
+      gsap.set(bgLayer1Ref.current, { opacity: 0 });
+    }
+    if (bgLayer2Ref.current) {
+      gsap.set(bgLayer2Ref.current, { opacity: 0 });
+    }
+  }, []);
+
+  const changeBackground = useCallback((newImage: string) => {
+    if (newImage === currentImageRef.current) return;
+    
+    currentImageRef.current = newImage;
+    
+    // Kill any existing animation
+    if (timelineRef.current) {
+      timelineRef.current.kill();
+    }
+
+    const incomingLayer = activeLayerRef.current === 1 ? bgLayer2Ref.current : bgLayer1Ref.current;
+    const outgoingLayer = activeLayerRef.current === 1 ? bgLayer1Ref.current : bgLayer2Ref.current;
+
+    if (!incomingLayer || !outgoingLayer) return;
+
+    // Set new image on incoming layer (while it's still invisible)
+    incomingLayer.style.backgroundImage = `url('${newImage}')`;
+    
+    // Create timeline for smooth crossfade
+    timelineRef.current = gsap.timeline();
+    
+    timelineRef.current
+      .set(incomingLayer, { 
+        opacity: 0,
+        scale: 1.02,
+        zIndex: 3 
+      })
+      .set(outgoingLayer, { 
+        zIndex: 2 
+      })
+      .to(incomingLayer, {
+        opacity: 1,
+        scale: 1,
+        duration: 0.5,
+        ease: 'power2.inOut',
+      })
+      .to(outgoingLayer, {
+        opacity: 0,
+        duration: 0.5,
+        ease: 'power2.inOut',
+      }, '<') // Start at same time
+      .set(outgoingLayer, { 
+        scale: 1,
+        zIndex: 1 
+      });
+
+    // Toggle active layer
+    activeLayerRef.current = activeLayerRef.current === 1 ? 2 : 1;
+  }, []);
 
   const handleLevelEnter = (levelIndex: number) => {
-    setGlobalBg(levels[levelIndex].defaultImage);
+    changeBackground(levels[levelIndex].defaultImage);
     setActiveLevel(levelIndex);
+    
+    // Animate level panel in
+    const panel = levelPanelsRef.current[levelIndex];
+    if (panel) {
+      gsap.killTweensOf(panel);
+      gsap.to(panel, {
+        opacity: 1,
+        y: 0,
+        duration: 0.4,
+        ease: 'power3.out'
+      });
+    }
+  };
+
+  const handleLevelLeave = (levelIndex: number) => {
+    // Animate level panel out
+    const panel = levelPanelsRef.current[levelIndex];
+    if (panel) {
+      gsap.killTweensOf(panel);
+      gsap.to(panel, {
+        opacity: 0,
+        y: 20,
+        duration: 0.3,
+        ease: 'power2.in'
+      });
+    }
   };
 
   const handleAmenityHover = (image: string, levelIndex: number) => {
-    setGlobalBg(image);
+    changeBackground(image);
     setActiveLevel(levelIndex);
   };
 
   const handleGlobalLeave = () => {
-    setGlobalBg(levels[0].defaultImage);
+    // Kill any existing animation
+    if (timelineRef.current) {
+      timelineRef.current.kill();
+    }
+    
+    currentImageRef.current = '/clubhouse.png';
+    
+    const layer1 = bgLayer1Ref.current;
+    const layer2 = bgLayer2Ref.current;
+    
+    // Simply hide both transition layers - default bg is always visible underneath
+    if (layer1 && layer2) {
+      gsap.to([layer1, layer2], {
+        opacity: 0,
+        duration: 0.3,
+        ease: 'power2.out'
+      });
+      activeLayerRef.current = 1;
+    }
+    
     setActiveLevel(null);
+    
+    // Animate all panels out
+    levelPanelsRef.current.forEach(panel => {
+      if (panel) {
+        gsap.killTweensOf(panel);
+        gsap.to(panel, {
+          opacity: 0,
+          y: 20,
+          duration: 0.3,
+          ease: 'power2.in'
+        });
+      }
+    });
   };
 
   return (
-    <section className="relative bg-gray-900 w-full h-screen overflow-hidden">
+    <section className="relative bg-black w-full h-screen overflow-hidden">
       <div className="w-full h-full px-0 relative z-10">
         <div 
-          className="relative grid grid-cols-1 lg:grid-cols-4 h-full bg-cover bg-center transition-all duration-400 ease-in-out"
-          style={{ backgroundImage: `url('${globalBg}')` }}
+          className="relative grid grid-cols-1 lg:grid-cols-4 h-full"
           onMouseLeave={handleGlobalLeave}
         >
-          {/* Decorative shape placed inside the grid so it appears above the background image */}
-          <div className="absolute inset-0 pointer-events-none z-5 overflow-hidden">
-          <div className="absolute right-[-20%] -top-2 w-[160vw] md:w-[150vw] lg:w-[140vw]">
+          {/* Permanent default background - always visible underneath */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ zIndex: 0, backgroundImage: `url('/clubhouse.png')` }}
+          />
+
+          {/* Background layer 1 - for transitions */}
+          <div 
+            ref={bgLayer1Ref}
+            className="absolute inset-0 bg-cover bg-center will-change-transform"
+            style={{ zIndex: 1 }}
+          />
+          
+          {/* Background layer 2 - for transitions */}
+          <div 
+            ref={bgLayer2Ref}
+            className="absolute inset-0 bg-cover bg-center will-change-transform"
+            style={{ zIndex: 1 }}
+          />
+
+          {/* Decorative shape */}
+          <div className="absolute inset-0 pointer-events-none z-[5] overflow-hidden">
+            <div className="absolute right-[-20%] -top-2 w-[160vw] md:w-[150vw] lg:w-[140vw]">
               <Image
                 src={shapeTwoPath}
                 alt="Background shape"
                 width={7200}
                 height={5400}
-
                 unoptimized
                 className="w-full h-auto"
                 priority
               />
             </div>
           </div>
+
           {levels.map((level, levelIndex) => (
             <div
               key={levelIndex}
-              className={`relative h-full ${levelIndex < 3 ? 'lg:border-r border-gray-700' : ''}`}
+              className={`relative h-full z-[3] ${levelIndex < 3 ? 'lg:border-r border-gray-700' : ''}`}
               onMouseEnter={() => handleLevelEnter(levelIndex)}
+              onMouseLeave={() => handleLevelLeave(levelIndex)}
             >
               <div className="flex items-end h-full">
                 <div
-                  className={`absolute left-0 w-full bg-black/55 text-white px-7 py-5 transition-all duration-450 ease-in-out ${
-                    activeLevel === levelIndex
-                      ? 'opacity-100 translate-y-0 pointer-events-auto'
-                      : 'opacity-0 translate-y-5 pointer-events-none'
-                  }`}
+                  ref={el => { levelPanelsRef.current[levelIndex] = el; }}
+                  className="absolute left-0 w-full bg-gradient-to-t from-black/80 via-black/60 to-transparent text-white px-8 py-8 pointer-events-auto backdrop-blur-[2px]"
+                  style={{ 
+                    opacity: 0, 
+                    transform: 'translateY(20px)' 
+                  }}
                 >
-                  <h2 className="text-xl font-semibold mb-2">
-                    <span className="border-b border-white pb-1">{level.level}</span>
+                  <h2 className="text-xs font-medium tracking-[0.3em] uppercase text-white/70 mb-4">
+                    {level.level}
                   </h2>
-                  <div className="space-y-1">
+                  <div className="space-y-3">
                     {level.amenities.map((amenity, idx) => (
-                      <p key={idx} className="text-base">
+                      <p key={idx} className="text-[15px] leading-relaxed">
                         <span
-                          className="inline-block cursor-pointer border-b border-white/15 border-dashed pb-1.5 hover:border-white/40 transition-colors"
+                          className="inline-block cursor-pointer text-white/90 hover:text-white border-b border-transparent hover:border-white/40 pb-0.5 transition-all duration-300 ease-out"
                           onMouseEnter={() => handleAmenityHover(amenity.image, levelIndex)}
                         >
                           {amenity.name}
@@ -147,7 +306,6 @@ export default function MiraiClubhouse() {
           ))}
         </div>
       </div>
-
     </section>
   );
 }

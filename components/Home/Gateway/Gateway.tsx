@@ -492,9 +492,6 @@ export function RevealZoom({
     animatePointer(pointer3Ref, 9.8, 10.5);
     animatePointer(pointer4Ref, 11.3, 12.5);
 
-    // Store last valid progress to prevent jumps
-    let lastProgress = 0;
-
     // Create ScrollTrigger that controls the timeline
     const st = ScrollTrigger.create({
       trigger: wrapperRef.current,
@@ -512,16 +509,7 @@ export function RevealZoom({
         }
         
         // Normal operation - update timeline based on scroll
-        const progress = self.progress;
-        
-        // Prevent backwards jumps that might happen on refresh
-        if (progress < lastProgress - 0.1 && lastProgress > 0.5) {
-          // This might be a refresh causing a jump - ignore it
-          return;
-        }
-        
-        lastProgress = progress;
-        tl.progress(progress);
+        tl.progress(self.progress);
       },
       onRefresh: () => {
         // On refresh, if locked, ensure we're at 0

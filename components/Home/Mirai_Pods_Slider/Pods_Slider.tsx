@@ -34,9 +34,7 @@ export default function MiraiPodsSlider() {
 
   const frameRef = useRef<HTMLDivElement>(null);
   const thumbWrapperRef = useRef<HTMLDivElement>(null);
-  const prevThumbWrapperRef = useRef<HTMLDivElement>(null);
   const thumbRef = useRef<HTMLDivElement>(null);
-  const prevThumbRef = useRef<HTMLDivElement>(null);
   const layerARef = useRef<HTMLDivElement>(null);
   const layerBRef = useRef<HTMLDivElement>(null);
   const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
@@ -60,11 +58,10 @@ export default function MiraiPodsSlider() {
 
     const thumb = thumbRef.current;
     const thumbWrapper = thumbWrapperRef.current;
-    const prevThumbWrapper = prevThumbWrapperRef.current;
     const frame = frameRef.current;
     const incomingLayer = activeLayer === 'A' ? layerBRef.current : layerARef.current;
 
-    if (!thumb || !frame || !thumbWrapper || !incomingLayer || !prevThumbWrapper) return;
+    if (!thumb || !frame || !thumbWrapper || !incomingLayer) return;
 
     setIsAnimating(true);
     setShowContent(false);
@@ -82,7 +79,7 @@ export default function MiraiPodsSlider() {
     const offsetX = thumbRect.left - frameRect.left;
     const offsetY = thumbRect.top - frameRect.top;
 
-    gsap.to([thumbWrapper, prevThumbWrapper], {
+    gsap.to(thumbWrapper, {
       opacity: 0,
       duration: 0.15,
       ease: 'power2.out',
@@ -123,7 +120,7 @@ export default function MiraiPodsSlider() {
           zIndex: 5,
         });
 
-        gsap.to([thumbWrapper, prevThumbWrapper], {
+        gsap.to(thumbWrapper, {
           opacity: 1,
           duration: 0.25,
           ease: 'power2.out',
@@ -138,13 +135,12 @@ export default function MiraiPodsSlider() {
   const goToPrev = () => {
     if (isAnimating || currentIndex === 0) return;
 
-    const prevThumb = prevThumbRef.current;
+    const thumb = thumbRef.current;
     const thumbWrapper = thumbWrapperRef.current;
-    const prevThumbWrapper = prevThumbWrapperRef.current;
     const frame = frameRef.current;
     const incomingLayer = activeLayer === 'A' ? layerBRef.current : layerARef.current;
 
-    if (!prevThumb || !frame || !thumbWrapper || !incomingLayer || !prevThumbWrapper) return;
+    if (!thumb || !frame || !thumbWrapper || !incomingLayer) return;
 
     setIsAnimating(true);
     setShowContent(false);
@@ -155,64 +151,51 @@ export default function MiraiPodsSlider() {
       setLayerAIndex(prevIndex);
     }
 
-    const thumbRect = prevThumb.getBoundingClientRect();
-    const frameRect = frame.getBoundingClientRect();
-
-    const scaleX = thumbRect.width / frameRect.width;
-    const offsetX = thumbRect.left - frameRect.left;
-    const offsetY = thumbRect.top - frameRect.top;
-
-    gsap.to([thumbWrapper, prevThumbWrapper], {
+    gsap.to(thumbWrapper, {
       opacity: 0,
       duration: 0.15,
       ease: 'power2.out',
     });
 
-    gsap.set(incomingLayer, {
-      zIndex: 10,
-      transformOrigin: 'top left',
-      scale: scaleX,
-      x: offsetX,
-      y: offsetY,
-      borderRadius: 8,
-    });
+    const oldLayer = activeLayer === 'A' ? layerARef.current : layerBRef.current;
 
-    gsap.to(incomingLayer, {
+    gsap.set(incomingLayer, {
+      zIndex: 5,
       scale: 1,
       x: 0,
       y: 0,
       borderRadius: 0,
-      duration: 0.6,
-      ease: 'power2.inOut',
-      onComplete: () => {
-        const newActiveLayer = activeLayer === 'A' ? 'B' : 'A';
-        setActiveLayer(newActiveLayer);
+    });
 
-        const oldLayer = activeLayer === 'A' ? layerARef.current : layerBRef.current;
-        if (oldLayer) {
+    if (oldLayer) {
+      gsap.set(oldLayer, {
+        zIndex: 10,
+      });
+
+      gsap.to(oldLayer, {
+        opacity: 0,
+        duration: 0.4,
+        ease: 'power2.inOut',
+        onComplete: () => {
           gsap.set(oldLayer, {
             zIndex: 1,
-            scale: 1,
-            x: 0,
-            y: 0,
-            borderRadius: 0,
+            opacity: 1,
           });
-        }
 
-        gsap.set(incomingLayer, {
-          zIndex: 5,
-        });
+          const newActiveLayer = activeLayer === 'A' ? 'B' : 'A';
+          setActiveLayer(newActiveLayer);
 
-        gsap.to([thumbWrapper, prevThumbWrapper], {
-          opacity: 1,
-          duration: 0.25,
-          ease: 'power2.out',
-        });
+          gsap.to(thumbWrapper, {
+            opacity: 1,
+            duration: 0.25,
+            ease: 'power2.out',
+          });
 
-        setShowContent(true);
-        setIsAnimating(false);
-      },
-    });
+          setShowContent(true);
+          setIsAnimating(false);
+        },
+      });
+    }
   };
 
   // Autoplay
@@ -282,7 +265,8 @@ export default function MiraiPodsSlider() {
             style={{
               position: 'absolute',
               inset: 0,
-              background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.2) 50%, transparent)',
+              background:
+                'linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.2) 50%, transparent)',
             }}
           />
         </div>
@@ -312,24 +296,25 @@ export default function MiraiPodsSlider() {
             style={{
               position: 'absolute',
               inset: 0,
-              background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.2) 50%, transparent)',
+              background:
+                'linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.2) 50%, transparent)',
             }}
           />
         </div>
 
-        {/* Content - Centered horizontally, aligned with thumbnails at bottom */}
+        {/* Content - Moved to left side where previous thumbnail was */}
         <div
           style={{
             position: 'absolute',
             bottom: 80,
-            left: '50%',
-            transform: 'translateX(-50%)',
+            left: 40,
             color: '#fff',
-            textAlign: 'center',
+            textAlign: 'left',
             opacity: showContent ? 1 : 0,
             transition: 'opacity 0.4s ease',
             transitionDelay: showContent ? '0.25s' : '0s',
             zIndex: 20,
+            maxWidth: 400,
           }}
         >
           <p
@@ -357,6 +342,21 @@ export default function MiraiPodsSlider() {
           </h2>
         </div>
       </div>
+
+      {/* Decorative Shape - Fixed z-index to be visible above the frame */}
+      <img
+        src={SHAPE_TWO_PODS}
+        alt=""
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: 'auto',
+          pointerEvents: 'none',
+          zIndex: 15,
+        }}
+      />
 
       {/* Prev Button */}
       <button
@@ -412,77 +412,6 @@ export default function MiraiPodsSlider() {
       >
         ›
       </button>
-
-      {/* Previous Thumbnail (Left Side) */}
-      <div
-        ref={prevThumbWrapperRef}
-        style={{
-          position: 'absolute',
-          bottom: 80,
-          left: 40,
-          zIndex: 40,
-          opacity: currentIndex === 0 ? 0 : 1,
-          pointerEvents: currentIndex === 0 ? 'none' : 'auto',
-          transition: 'opacity 0.3s ease',
-        }}
-      >
-        <div
-          ref={prevThumbRef}
-          style={{
-            width: 180,
-            height: 110,
-            borderRadius: 8,
-            overflow: 'hidden',
-            border: '2px solid rgba(255,255,255,0.5)',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
-            position: 'relative',
-          }}
-        >
-          <img
-            src={slides[prevIndex]?.image || slides[0].image}
-            alt={slides[prevIndex]?.label || slides[0].label}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              display: 'block',
-            }}
-          />
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent 60%)',
-              display: 'flex',
-              alignItems: 'flex-end',
-              padding: 10,
-            }}
-          >
-            <span
-              style={{
-                color: '#fff',
-                fontSize: 10,
-                textTransform: 'uppercase',
-                letterSpacing: 2,
-              }}
-            >
-              {slides[prevIndex]?.label || slides[0].label}
-            </span>
-          </div>
-        </div>
-        <div style={{ textAlign: 'center', marginTop: 12 }}>
-          <span
-            style={{
-              color: 'rgba(255,255,255,0.5)',
-              fontSize: 9,
-              textTransform: 'uppercase',
-              letterSpacing: 3,
-            }}
-          >
-            Previous
-          </span>
-        </div>
-      </div>
 
       {/* Next Thumbnail (Right Side) */}
       <div
@@ -551,24 +480,6 @@ export default function MiraiPodsSlider() {
           </span>
         </div>
       </div>
-
-      {/* Decorative Shape */}
-      <img
-        src={SHAPE_TWO_PODS}
-        alt=""
-        style={{
-          position: 'absolute',
-          top: -8,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '100vw',
-          maxWidth: 1250,
-          height: 'auto',
-          pointerEvents: 'none',
-          zIndex: 0,
-          opacity: 0.9,
-        }}
-      />
     </section>
   );
 }
