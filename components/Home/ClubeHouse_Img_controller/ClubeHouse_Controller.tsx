@@ -39,7 +39,7 @@ const levels: Level[] = [
       { name: 'Billiards & Snooker', image: 'https://images.unsplash.com/photo-1767338526030-a5c9ba27245a?w=1600&q=80&auto=format' },
       { name: 'Guest Rooms', image: 'https://images.unsplash.com/photo-1767339112497-de66b10afed3?w=1600&q=80&auto=format' },
       { name: 'Spa', image: '/images/image_controller/level2-four.jpg' },
-      { name: 'Mini Sports Lounge', image: '/images/image_controller/SPORTSBAR.jpg' },
+      { name: 'Mini Sports Lounge', image: 'https://images.unsplash.com/photo-1767437854729-51a8f050e579?w=1600&q=80&auto=format&fit=crop' },
       { name: 'Cigar Room', image: '/images/image_controller/Cigar Room.png' }
     ]
   }, 
@@ -49,9 +49,9 @@ const levels: Level[] = [
     amenities: [
       { name: 'Half Olympic Pool', image: '/images/image_controller/Podium Pool.jpg' },
       { name: 'TT Room', image: 'https://images.unsplash.com/photo-1767344464272-17e1c657f8bf?w=1600&q=80&auto=format' },
-      { name: 'Coworking Space', image: 'https://images.unsplash.com/photo-1767344866400-cb200a2be4c5?w=1600&q=80&auto=format' },
+      { name: 'Coworking Space', image: '/images/image_controller/coworking space.jpg' },
       { name: 'Squash Court', image: 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/level3-five.png' },
-      { name: 'Badminton Courts', image: '/images/image_controller/BADMINTON.jpg' },
+      { name: 'Badminton Courts', image: 'https://images.unsplash.com/photo-1767437854156-9afa48aeba89?w=1600&q=80&auto=format&fit=crop' },
       { name: 'Conference Arena', image: 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/office-room.jpg' }
     ]
   },

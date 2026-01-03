@@ -33,17 +33,36 @@ export default function SixthElement() {
   }, [])
 
   // Maps global progress to local element timing
-  const getScrollStyle = (start: number, end: number) => {
+  const getScrollStyle = (start: number, end: number): React.CSSProperties => {
     const localProgress = Math.max(0, Math.min(1, (scrollProgress - start) / (end - start)))
-    
+
     return {
       opacity: localProgress,
       // Moves text from 60px down up to its natural position (0px)
-      transform: `translateY(${(1 - localProgress) * 60}px)`, 
+      transform: `translateY(${(1 - localProgress) * 60}px)`,
       // Micro-transition prevents "jagged" movement on low-precision mouse wheels
-      transition: 'opacity 0.15s linear, transform 0.15s ease-out', 
-    }
+      transition: 'opacity 0.15s linear, transform 0.15s ease-out',
+    } as React.CSSProperties
   }
+
+  // Computed styles for headings — preserve scroll-driven opacity but scale it by 0.95
+  const h1Scroll: React.CSSProperties = getScrollStyle(0.15, 0.35)
+  const h2Scroll: React.CSSProperties = getScrollStyle(0.25, 0.45)
+
+  const headingBase: React.CSSProperties = {
+    letterSpacing: '4px',
+    textRendering: 'optimizeLegibility' as any,
+    WebkitFontSmoothing: 'antialiased' as any,
+    unicodeBidi: 'isolate' as any,
+    marginBlock: '.83em',
+    marginInline: 0,
+    display: 'block',
+    fontSize: '48px',
+    fontWeight: 250,
+  }
+
+  const h1Style: React.CSSProperties = { ...h1Scroll, ...headingBase, opacity: ((h1Scroll.opacity as number) || 0) * 0.95, fontFamily: 'Migra, sans-serif', color: '#78252f' }
+  const h2Style: React.CSSProperties = { ...h2Scroll, ...headingBase, opacity: ((h2Scroll.opacity as number) || 0) * 0.95, fontFamily: 'Migra, sans-serif', color: '#78252f' }
 
   return (
     <section 
@@ -75,7 +94,7 @@ export default function SixthElement() {
           {/* Welcome Header: Appears between 15% and 35% of the scroll */}
           <h1 
             className="uppercase tracking-[0.3em] mb-2 md:mb-4 text-black"
-            style={{ ...getScrollStyle(0.15, 0.35), fontFamily: 'Migra, sans-serif', fontSize: '48px', color: '#78252f', fontWeight: 100 }}
+            style={h1Style}
           >
             Welcome to Pavani Mirai
           </h1>
@@ -83,7 +102,7 @@ export default function SixthElement() {
           {/* Main Title: Appears between 25% and 45% of the scroll */}
           <h2 
             className="leading-tight mb-6 md:mb-10 text-black"
-            style={{ ...getScrollStyle(0.25, 0.45), fontFamily: 'Migra, sans-serif', fontSize: '48px', color: '#78252f', fontWeight: 100 }}
+            style={h2Style}
           >
             Where you Live the <span>Sixth Element</span>
           </h2>
@@ -91,7 +110,7 @@ export default function SixthElement() {
           <div className="max-w-3xl mx-auto space-y-4 md:space-y-6">
             {/* Paragraph 1: Appears between 35% and 55% of the scroll */}
             <p 
-              className="text-sm md:text-xl leading-relaxed font-normal text-black"
+              className="leading-relaxed font-normal text-black"
               style={{ ...getScrollStyle(0.35, 0.55), fontSize: '20px' }}
             >
               Nature crafted five elements — <span className="font-bold">Earth</span> that grounds us. 
@@ -103,7 +122,7 @@ export default function SixthElement() {
             
             {/* Paragraph 2: Appears between 45% and 65% of the scroll */}
             <p 
-              className="hidden md:block text-lg md:text-xl leading-relaxed font-normal text-black"
+              className="hidden md:block leading-relaxed font-normal text-black"
               style={{ ...getScrollStyle(0.45, 0.65), fontSize: '20px' }}
             >
               With Pavani as the catalyst, the <span className="italic font-medium">sixth element</span> takes shape when all the elements are brought together in serene harmony. 

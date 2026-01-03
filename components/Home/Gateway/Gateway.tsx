@@ -460,7 +460,7 @@ export function RevealZoom({
 
         {/* 3. Clubhouse - MOVES with image */}
         {/* Starts off-screen below, pans into view */}
-        <div ref={pointer3Ref} className="absolute" style={{ zIndex: 20, top: '200%', right: '32%', willChange: 'transform' }}>
+        <div ref={pointer3Ref} className="absolute" style={{ zIndex: 20, top: '200%', right: '31%', willChange: 'transform' }}>
           <div ref={pointer3InnerRef} className="opacity-0 scale-90 origin-center">
             <Hotspot 
               title="Clubhouse" 
