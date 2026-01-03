@@ -69,31 +69,30 @@ export default function SixthElement() {
       />
 
       {/* Text Overlay: Content linked to the scroller position */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+      <div className="absolute inset-0 flex items-end justify-center pointer-events-none pb-13">
         <div className="max-w-5xl px-6 text-center text-black">
           
           {/* Welcome Header: Appears between 15% and 35% of the scroll */}
           <h1 
-            className="text-sm md:text-xl uppercase tracking-[0.3em] mb-2 md:mb-4 font-light text-black"
-            style={getScrollStyle(0.15, 0.35)}
+            className="uppercase tracking-[0.3em] mb-2 md:mb-4 text-black"
+            style={{ ...getScrollStyle(0.15, 0.35), fontFamily: 'Migra, sans-serif', fontSize: '48px', color: '#78252f', fontWeight: 100 }}
           >
             Welcome to Pavani Mirai
           </h1>
 
           {/* Main Title: Appears between 25% and 45% of the scroll */}
           <h2 
-            className="text-3xl md:text-7xl font-bold leading-tight mb-6 md:mb-10 text-black"
-            style={getScrollStyle(0.25, 0.45)}
+            className="leading-tight mb-6 md:mb-10 text-black"
+            style={{ ...getScrollStyle(0.25, 0.45), fontFamily: 'Migra, sans-serif', fontSize: '48px', color: '#78252f', fontWeight: 100 }}
           >
-            Where you Live the <br /> 
-            <span>Sixth Element</span>
+            Where you Live the <span>Sixth Element</span>
           </h2>
 
           <div className="max-w-3xl mx-auto space-y-4 md:space-y-6">
             {/* Paragraph 1: Appears between 35% and 55% of the scroll */}
             <p 
               className="text-sm md:text-xl leading-relaxed font-normal text-black"
-              style={getScrollStyle(0.35, 0.55)}
+              style={{ ...getScrollStyle(0.35, 0.55), fontSize: '20px' }}
             >
               Nature crafted five elements — <span className="font-bold">Earth</span> that grounds us. 
               <span className="font-bold"> Water</span> that nourishes us. 
@@ -105,7 +104,7 @@ export default function SixthElement() {
             {/* Paragraph 2: Appears between 45% and 65% of the scroll */}
             <p 
               className="hidden md:block text-lg md:text-xl leading-relaxed font-normal text-black"
-              style={getScrollStyle(0.45, 0.65)}
+              style={{ ...getScrollStyle(0.45, 0.65), fontSize: '20px' }}
             >
               With Pavani as the catalyst, the <span className="italic font-medium">sixth element</span> takes shape when all the elements are brought together in serene harmony. 
               This is how Mirai was birthed — to give meaning to all of these elements and to harness their full potential.
