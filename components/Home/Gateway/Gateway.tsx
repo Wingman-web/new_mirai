@@ -377,10 +377,11 @@ export function RevealZoom({
     revealHotspot(pointer1InnerRef, 13);
     
     // 2. Residencies (Fixed in viewport)
-    // Manually reveal Residencies without auto-hide so it stays visible
+    // Manually reveal Residencies right after SkyPods and keep it visible until Clubhouse
     tl.to(pointer2InnerRef.current, { opacity: 1, scale: 1, duration: 1.4, ease: "back.out(1.4)" }, 14);
-    // Keep Residencies visible until Clubhouse appears
-    tl.to(pointer2InnerRef.current, { opacity: 0, scale: 0.95, duration: 1.0, ease: "power1.in" }, 21);
+    // Hide Residencies so it is fully gone when Clubhouse appears
+    // Start hiding slightly earlier (finish by t=21)
+    tl.to(pointer2InnerRef.current, { opacity: 0, scale: 0.95, duration: 1.0, ease: "power1.in" }, 20.0);
     
     // 3. Clubhouse (Moves - pans into view)
     revealHotspot(pointer3InnerRef, 21);
@@ -434,7 +435,7 @@ export function RevealZoom({
         
         {/* 1. SkyPods - MOVES with image */}
         {/* Starts visible, pans up and out of view */}
-        <div ref={pointer1Ref} className="absolute" style={{ zIndex: 20, top: '41%', left: '15%', willChange: 'transform' }}>
+        <div ref={pointer1Ref} className="absolute" style={{ zIndex: 20, top: '40%', left: '15%', willChange: 'transform' }}>
           <div ref={pointer1InnerRef} className="opacity-0 scale-90 origin-center">
             <Hotspot 
               title="SkyPods" 
@@ -446,7 +447,7 @@ export function RevealZoom({
         </div>
 
         {/* 2. Residencies - FIXED in viewport */}
-        <div ref={pointer2Ref} className="absolute" style={{ zIndex: 20, top: '36%', right: '20%', willChange: 'transform' }}>
+        <div ref={pointer2Ref} className="absolute" style={{ zIndex: 20, top: '40%', right: '30%', willChange: 'transform' }}>
           <div ref={pointer2InnerRef} className="opacity-0 scale-90 origin-center">
             <Hotspot 
               title="Residencies" 
@@ -459,7 +460,7 @@ export function RevealZoom({
 
         {/* 3. Clubhouse - MOVES with image */}
         {/* Starts off-screen below, pans into view */}
-        <div ref={pointer3Ref} className="absolute" style={{ zIndex: 20, top: '195%', right: '32%', willChange: 'transform' }}>
+        <div ref={pointer3Ref} className="absolute" style={{ zIndex: 20, top: '200%', right: '32%', willChange: 'transform' }}>
           <div ref={pointer3InnerRef} className="opacity-0 scale-90 origin-center">
             <Hotspot 
               title="Clubhouse" 
@@ -472,7 +473,7 @@ export function RevealZoom({
 
         {/* 4. Podium Level - MOVES with image */}
         {/* Starts off-screen below, pans into view at end */}
-        <div ref={pointer4Ref} className="absolute" style={{ zIndex: 20, top: '210%', left: '10%', willChange: 'transform' }}>
+        <div ref={pointer4Ref} className="absolute" style={{ zIndex: 20, top: '212%', left: '10%', willChange: 'transform' }}>
           <div ref={pointer4InnerRef} className="opacity-0 scale-90 origin-center">
             <Hotspot 
               title="Podium Level" 
@@ -484,10 +485,10 @@ export function RevealZoom({
         </div>
 
         {/* Floating Text */}
-        <div ref={textRef} className="absolute top-1/4 right-10 md:right-24" style={{ zIndex: 5 }}>
-          <h2 className="text-4xl md:text-6xl font-light text-white leading-tight tracking-tight uppercase">
+        <div ref={textRef} className="absolute top-10 right-10 md:top-16 md:right-24" style={{ zIndex: 5 }}>
+          <h2 className="text-white leading-tight tracking-tight uppercase text-right" style={{ fontFamily: 'Migra', fontSize: '42px', fontWeight: 300 }}>
             Where You're Always<br />
-            <span className="font-bold">In Your Element</span>
+            In Your Element
           </h2>
         </div>
 
