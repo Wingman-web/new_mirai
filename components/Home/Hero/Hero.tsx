@@ -12,7 +12,6 @@ const Hero = () => {
 
   useEffect(() => {
     if (typeof window !== 'undefined' && videoRef.current) {
-      videoRef.current.load();
       videoRef.current.play().catch(() => {});
     }
   }, [])
@@ -97,13 +96,14 @@ const Hero = () => {
       {/* Video Background */}
       <video
         ref={videoRef}
-        style={{ ...fullScreenMediaStyle, opacity: videoReady ? 1 : 0, transition: 'opacity 300ms ease' }}
+        style={{ ...fullScreenMediaStyle, objectFit: 'cover', opacity: videoReady ? 1 : 0, transition: 'opacity 300ms ease' }}
         crossOrigin="anonymous"
         autoPlay
         muted
         loop
         playsInline
         preload="auto"
+        disableRemotePlayback
         onCanPlay={() => { handleCanPlay(); setVideoReady(true); }}
         onLoadedData={() => setVideoReady(true)}
       >
