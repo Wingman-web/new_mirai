@@ -6,6 +6,7 @@ import Carousel from '@/components/Amenities/Slider/Slider'
 import SparkleLogo from '@/components/Amenities/Spracle_Animation/page'
 import EraSeasons from '@/components/Amenities/Era_Interative_session/page'
 import Footer from '@/components/Home/Footer/Footer';
+import Background from '@/components/Amenities/Bagroung_image/Page';
 
 
 export default function AmenitiesPage() {
@@ -14,6 +15,7 @@ export default function AmenitiesPage() {
       <AmenitiesHero />
       <MiraiAmenities />
       <MiraiAmenitiesShowcase />
+      <Background />
       <Carousel />
       <SparkleLogo />
       <EraSeasons />

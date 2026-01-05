@@ -19,15 +19,15 @@ interface Level {
 const levels: Level[] = [
   {
     level: 'Level 1',
-    defaultImage: '/images/image_controller/BANQUATE HALL.png',
+    defaultImage: 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/level1-one.png',
     amenities: [
-      { name: '350-Seater Multipurpose Hall', image: '/images/image_controller/BANQUATE HALL.png' },
+      { name: '350-Seater Multipurpose Hall', image: 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/level1-one.png' },
       { name: 'Pre-Function Hall', image: 'https://images.unsplash.com/photo-1767337264371-13af71aa7bf7?w=1600&q=80&auto=format' },
       { name: 'Dance Studio', image: 'https://images.unsplash.com/photo-1767337264862-44fe578e16bd?w=1600&q=80&auto=format' },
       { name: 'Creche', image: 'https://images.unsplash.com/photo-1767337171304-9a206edf28b3?w=1600&q=80&auto=format' },
       { name: 'Virtual Cricket', image: 'https://images.unsplash.com/photo-1767337264375-369be20eb266?w=1600&q=80&auto=format' },
       { name: 'Virtual Golf', image: 'https://images.unsplash.com/photo-1767337264219-05e802db7c0b?w=1600&q=80&auto=format' },
-      { name: 'Kids Activity Rooms', image: '/images/image_controller/Kids_plyaing_area.png' }
+      { name: 'Kids Activity Rooms', image: 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/playzone.png' }
     ]
   },
   {
@@ -37,18 +37,18 @@ const levels: Level[] = [
       { name: '50-Seater Private Theatre', image: 'https://images.unsplash.com/photo-1767338692158-5dd559d1f432?w=1600&q=80&auto=format' },
       { name: 'Billiards & Snooker', image: 'https://images.unsplash.com/photo-1767338526030-a5c9ba27245a?w=1600&q=80&auto=format' },
       { name: 'Guest Rooms', image: 'https://images.unsplash.com/photo-1767339112497-de66b10afed3?w=1600&q=80&auto=format' },
-      { name: 'Spa', image: '/images/image_controller/level2-four.jpg' },
+      { name: 'Spa', image: 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/level2-four.jpg' },
       { name: 'Mini Sports Lounge', image: 'https://images.unsplash.com/photo-1767437854729-51a8f050e579?w=1600&q=80&auto=format&fit=crop' },
-      { name: 'Cigar Room', image: '/images/image_controller/Cigar Room.png' }
+      { name: 'Cigar Room', image: 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/cigarroom.png' }
     ]
   },
   {
     level: 'Level 3',
-    defaultImage: '/images/image_controller/Podium Pool.jpg',
+    defaultImage: 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/level3-one.jpg',
     amenities: [
-      { name: 'Half Olympic Pool', image: '/images/image_controller/Podium Pool.jpg' },
+      { name: 'Half Olympic Pool', image: 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/level3-one.jpg' },
       { name: 'TT Room', image: 'https://images.unsplash.com/photo-1767344464272-17e1c657f8bf?w=1600&q=80&auto=format' },
-      { name: 'Coworking Space', image: '/images/image_controller/coworking space.jpg' },
+      { name: 'Coworking Space', image: 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/level3-four.jpg' },
       { name: 'Squash Court', image: 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/level3-five.png' },
       { name: 'Badminton Courts', image: 'https://images.unsplash.com/photo-1767437854156-9afa48aeba89?w=1600&q=80&auto=format&fit=crop' },
       { name: 'Conference Arena', image: 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/office-room.jpg' }
