@@ -17,7 +17,7 @@ export const NAV_LINKS: NavLink[] = [
   { 
     id: 2, 
     label: 'Amenities', 
-    href: 'https://azure-baboon-302476.hostingersite.com/mirai_latest/ameniti.html',
+    href: './amenities',
     description: 'Discover premium facilities including swimming pools, gyms, spas, and recreational areas designed for your comfort and wellness.'
   },
   { 
