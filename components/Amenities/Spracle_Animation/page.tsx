@@ -3,12 +3,13 @@
 import { useEffect, useRef, useState } from 'react';
 
 interface SparkleLogoProps {
-  emoji: string;
+  emoji?: string;
+  imageUrl?: string;
   alt: string;
   delay: number;
 }
 
-const SparkleLogo = ({ emoji, alt, delay }: SparkleLogoProps) => {
+const SparkleLogo = ({ emoji, imageUrl, alt, delay }: SparkleLogoProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const logoRef = useRef<HTMLDivElement>(null);
 
@@ -39,18 +40,25 @@ const SparkleLogo = ({ emoji, alt, delay }: SparkleLogoProps) => {
     <div
       ref={logoRef}
       className={`
-        w-16 h-16 md:w-24 md:h-24 lg:w-24 lg:h-24
-        bg-gradient-to-br from-purple-500 to-purple-700
-        rounded-2xl lg:rounded-[20px]
+        w-16 h-16 md:w-24 md:h-24 lg:w-32 lg:h-32
+        ${imageUrl ? 'bg-transparent shadow-none' : 'bg-gradient-to-br from-purple-500 to-purple-700 shadow-lg'}
+        ${imageUrl ? '' : 'rounded-2xl lg:rounded-[24px]'}
         flex items-center justify-center
-        border border-transparent shadow-lg
         transition-all duration-600 ease-out
-        text-4xl md:text-5xl
+        text-4xl md:text-5xl lg:text-6xl
         ${isVisible ? 'opacity-90 translate-y-0' : 'opacity-0 translate-y-12'}
       `}
       title={alt}
     >
-      {emoji}
+      {imageUrl ? (
+        <img 
+          src={imageUrl} 
+          alt={alt} 
+          className="w-full h-full object-contain"
+        />
+      ) : (
+        emoji
+      )}
     </div>
   );
 };
@@ -61,7 +69,7 @@ interface IndulgenceCloudsProps {
 }
 
 export default function IndulgenceClouds({ 
-  fullWindow = false, 
+  fullWindow = true, 
   embedded = false 
 }: IndulgenceCloudsProps) {
   const [headingVisible, setHeadingVisible] = useState(false);
@@ -85,26 +93,26 @@ export default function IndulgenceClouds({
   }, []);
 
   const logos = [
-    { emoji: '☁️', alt: 'Cloud' },
-    { emoji: '✨', alt: 'Sparkle' },
-    { emoji: '🌙', alt: 'Moon' },
-    { emoji: '⭐', alt: 'Star' },
+    { imageUrl: 'https://azure-baboon-302476.hostingersite.com/mirai_latest/media/pods-03.png', alt: 'Pods' },
+    { imageUrl: 'https://azure-baboon-302476.hostingersite.com/mirai_latest/media/pods-02.png', alt: 'Pods 2' },
+    { imageUrl: 'https://azure-baboon-302476.hostingersite.com/mirai_latest/media/pods-04.png', alt: 'Pods 3' },
+    { imageUrl: 'https://azure-baboon-302476.hostingersite.com/mirai_latest/media/pods-01.png', alt: 'Pods 4' },
   ];
 
   const sectionClasses = `
     flex flex-col justify-center items-center w-full
-    bg-transparent gap-2
+    bg-transparent
     ${fullWindow 
-      ? 'min-h-screen py-12 px-4' 
-      : 'min-h-0 py-5'
+      ? 'h-screen px-4' 
+      : 'min-h-0 py-5 gap-2'
     }
   `;
 
   const headingClasses = `
-    font-sans text-center mx-4 my-1.5
+    font-sans text-center mx-4
     text-[#78252f] font-normal
     transition-all duration-600 ease-out
-    ${fullWindow ? 'text-6xl md:text-7xl my-2 mx-6' : 'text-2xl md:text-3xl'}
+    ${fullWindow ? 'text-6xl md:text-7xl lg:text-8xl mb-12 md:mb-16' : 'text-2xl md:text-3xl my-1.5'}
     ${headingVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2.5'}
   `;
 
@@ -116,11 +124,11 @@ export default function IndulgenceClouds({
         The Clouds
       </h1>
       
-      <div className="flex justify-center items-center min-h-10 gap-8 md:gap-16 lg:gap-24 flex-wrap pt-1 pb-2 mt-2.5">
+      <div className={`flex justify-center items-center gap-8 md:gap-16 lg:gap-24 flex-wrap ${fullWindow ? '' : 'min-h-10 pt-1 pb-2 mt-2.5'}`}>
         {logos.map((logo, index) => (
           <SparkleLogo
             key={logo.alt}
-            emoji={logo.emoji}
+            imageUrl={logo.imageUrl}
             alt={logo.alt}
             delay={index * 150}
           />
