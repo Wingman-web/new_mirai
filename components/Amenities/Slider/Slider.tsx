@@ -190,8 +190,8 @@ const Carousel = ({
   onPrev: () => void;
 }) => {
   return (
-    <div className="relative w-full h-[550px] overflow-hidden mb-10 rounded-2xl">
-      <div className="relative w-full h-full">
+    <div className="relative w-full h-[550px] mb-10 rounded-2xl flex items-center justify-center">
+      <div className="relative w-full h-full flex items-center justify-center overflow-visible">
         {items.map((item, index) => {
           const offset = (index - currentIndex + items.length) % items.length;
           const isActive = offset === 0;
@@ -199,32 +199,36 @@ const Carousel = ({
 
           if (!isVisible) return null;
 
+          // Default styling for Center Image
           let position = 'left-1/2 -translate-x-1/2';
-          let width = 'w-1/2';
+          let width = 'w-[45%]';
           let zIndex = 'z-30';
           let opacity = 'opacity-100';
           let scale = 'scale-100';
 
           if (!isActive) {
+            // Right Side Image - Positioned at 90%
             if (offset === 1) {
-              position = 'left-[75%]';
-              width = 'w-1/4';
+              position = 'left-[90%] -translate-x-1/2'; 
+              width = 'w-[28%]';
               zIndex = 'z-20';
-              opacity = 'opacity-80';
+              opacity = 'opacity-70';
               scale = 'scale-90';
-            } else if (offset === 2) {
-              position = 'left-[12.5%]';
-              width = 'w-1/4';
+            } 
+            // Left Side Image - Positioned at 10%
+            else if (offset === 2) {
+              position = 'left-[10%] -translate-x-1/2';
+              width = 'w-[28%]';
               zIndex = 'z-10';
-              opacity = 'opacity-60';
-              scale = 'scale-80';
+              opacity = 'opacity-50';
+              scale = 'scale-85';
             }
           }
 
           return (
             <div
               key={index}
-              className={`absolute top-[10%] h-[80%] ${width} ${position} ${zIndex} ${opacity} ${scale} transition-all duration-500 ease-in-out rounded-xl overflow-hidden`}
+              className={`absolute top-1/2 -translate-y-1/2 h-[80%] ${width} ${position} ${zIndex} ${opacity} ${scale} transition-all duration-700 ease-in-out rounded-xl overflow-hidden shadow-lg`}
             >
               <div className="relative w-full h-full">
                 <Image
@@ -283,7 +287,7 @@ export default function AmenitiesCarousel() {
 
   // Auto-play functionality
   useEffect(() => {
-    const interval = setInterval(handleNext, 3000);
+    const interval = setInterval(handleNext, 4000);
     return () => clearInterval(interval);
   }, [handleNext]);
 
@@ -293,11 +297,11 @@ export default function AmenitiesCarousel() {
   }, [activeTab]);
 
   return (
-    <section className="pt-8 lg:pt-16">
+    <section className="pt-8 lg:pt-16 bg-gradient-to-b from-gray-50 to-white">
       <div className="container mx-auto px-4">
         <div className="text-center py-12">
           {/* Tabs */}
-          <div className="flex justify-center gap-12 lg:gap-24 mb-8 flex-wrap">
+          <div className="flex justify-center gap-12 lg:gap-24 mb-8 flex-wrap relative z-50">
             {tabsData.map((tab, index) => (
               <button
                 key={index}
@@ -305,7 +309,7 @@ export default function AmenitiesCarousel() {
                 className={`text-3xl font-light transition-all duration-300 pb-2 border-b-2 ${
                   activeTab === index
                     ? 'text-[#78252F] border-[#78252F]'
-                    : 'text-gray-400 border-transparent'
+                    : 'text-gray-400 border-gray-300'
                 }`}
                 style={{ fontFamily: 'Migra, sans-serif' }}
               >
@@ -315,8 +319,8 @@ export default function AmenitiesCarousel() {
           </div>
 
           {/* Tab Content */}
-          <div className="max-w-5xl mx-auto mb-8">
-            <p className="text-lg leading-relaxed font-medium px-4 lg:px-16">
+          <div className="w-full mx-auto mb-8">
+            <p className="text-lg leading-relaxed font-medium text-gray-700" style={{ paddingLeft: '0.5%', paddingRight: '0.5%', textAlign: 'justify' }}>
               {tabsData[activeTab].description}
             </p>
           </div>
