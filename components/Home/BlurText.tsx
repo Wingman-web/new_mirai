@@ -53,9 +53,9 @@ export default function BlurText({
         y: 0,
         opacity: 1,
         filter: 'blur(0px)',
-        duration: 0.45,
+        duration: 0.4,
         ease: 'power3.out',
-        stagger: 0.06,
+        stagger: 0.04,
         delay: (delay || 0) / 1000,
         onComplete: () => onAnimationComplete && onAnimationComplete()
       }
