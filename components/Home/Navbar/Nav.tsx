@@ -12,7 +12,6 @@ const Nav = () => {
   const [hoveredLink, setHoveredLink] = useState<number | null>(null)
   const [isPageReady, setIsPageReady] = useState(false)
   const containerRef = useRef(null)
-  const STAR_COUNT = 8
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -101,46 +100,6 @@ const Nav = () => {
           flexDirection: 'row'
         }}
       >
-        {/* Falling Stars Background */}
-        {isOpen && (
-          <div style={{
-            position: 'absolute',
-            inset: 0,
-            pointerEvents: 'none',
-            zIndex: 15,
-            overflow: 'visible'
-          }}>
-            {[...Array(STAR_COUNT)].map((_, i) => {
-              const randomSize = Math.random() * 2 + 1
-              const randomLeft = Math.random() * 100
-              const randomOpacity = Math.random() * 0.4 + 0.4
-              const randomDuration = Math.random() * 8 + 8
-              const randomDelay = Math.random() * 3
-
-              const starStyle = {
-                width: randomSize + 'px',
-                height: randomSize + 'px',
-                left: randomLeft + '%',
-                top: '-20px',
-                opacity: randomOpacity,
-                backgroundColor: '#ffffff',
-                borderRadius: '50%',
-                position: 'absolute' as const,
-                boxShadow: `0 0 ${randomSize * 2}px rgba(255, 255, 255, ${randomOpacity})`
-              } as React.CSSProperties
-
-              return (
-                <div
-                  key={i}
-                  style={{
-                    ...starStyle,
-                    animation: `fallingStar ${randomDuration}s linear ${randomDelay}s infinite`
-                  }}
-                />
-              )
-            })}
-          </div>
-        )}
 
         {/* Content - 3 Columns */}
         <div style={{
@@ -159,7 +118,7 @@ const Nav = () => {
             justifyContent: 'flex-start',
             padding: '38px 40px',
             overflow: 'hidden',
-            backgroundColor: '#000'
+            backgroundColor: 'transparent'
           }}>
             <div style={{
               display: 'flex',
@@ -187,7 +146,7 @@ const Nav = () => {
                     fontSize: '44px',
                     fontFamily: 'var(--font-magra, "Magra", "Century Gothic", Arial, sans-serif)',
                     lineHeight: '1',
-                    fontWeight: 'bold',
+                    fontWeight: 300,
                     color: hoveredLink === link.id ? '#78252f' : '#fff'
                   }}>
                     {link.label}
@@ -215,7 +174,7 @@ const Nav = () => {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'flex-start',
-            backgroundColor: '#000',
+            backgroundColor: 'transparent',
             overflow: 'visible',
             padding: '40px 0'
           }}>
@@ -234,7 +193,6 @@ const Nav = () => {
                 ref={containerRef}
                 style={{
                   transformStyle: 'preserve-3d',
-                  /* CHANGED: Adjusted translateY from -30px to 10px to move it further down */
                   transform: `rotateZ(-20deg) rotateX(-10deg) translateY(10px) rotateY(${activeIndex * -72}deg)`,
                   transition: 'transform 0.8s cubic-bezier(0.645, 0.045, 0.355, 1)',
                   width: '460px',
@@ -292,21 +250,21 @@ const Nav = () => {
             </div>
           </div>
 
-          {/* Right Section - Description & CTA (1/3) */}
+          {/* Right Section - Description (1/3) */}
           <div style={{
             width: '28%',
             height: '100%',
-            backgroundColor: '#000',
+            backgroundColor: 'transparent',
             padding: '40px',
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'space-between',
+            justifyContent: 'flex-start',
             overflow: 'hidden'
           }}>
             <div>
               <h3 style={{
                 fontSize: '48px',
-                fontWeight: 'bold',
+                fontWeight: 300,
                 color: '#fff',
                 marginBottom: '32px',
                 letterSpacing: '-0.02em'
@@ -322,54 +280,9 @@ const Nav = () => {
                 {NAV_LINKS[activeIndex]?.description}
               </p>
             </div>
-
-            <button
-              style={{
-                backgroundColor: '#2563eb',
-                color: '#fff',
-                padding: '20px 48px',
-                borderRadius: '8px',
-                fontWeight: 'bold',
-                fontSize: '18px',
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                width: '100%'
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.backgroundColor = '#1d4ed8'
-                ;(e.currentTarget as HTMLElement).style.transform = 'scale(1.05)'
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.backgroundColor = '#2563eb'
-                ;(e.currentTarget as HTMLElement).style.transform = 'scale(1)'
-              }}
-              onMouseDown={(e) => {
-                (e.currentTarget as HTMLElement).style.transform = 'scale(0.95)'
-              }}
-              onMouseUp={(e) => {
-                (e.currentTarget as HTMLElement).style.transform = 'scale(1.05)'
-              }}
-              onClick={() => setIsOpen(false)}
-            >
-              Get In Touch
-            </button>
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes fallingStar {
-          0% {
-            transform: translateY(-20px);
-            opacity: 1;
-          }
-          100% {
-            transform: translateY(calc(100vh + 100px));
-            opacity: 0;
-          }
-        }
-      `}</style>
     </>
   )
 }
