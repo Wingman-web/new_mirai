@@ -29,17 +29,18 @@ export default function ContactForm() {
       const scrollTop = window.scrollY;
       const clientHeight = window.innerHeight;
       
-      // Calculate scroll percentage
-      const scrollPercentage = (scrollTop + clientHeight) / scrollHeight;
+      // Calculate how far from the absolute bottom we are
+      const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
       
-      // Start fading in at 85%, fully visible at 95%
-      if (scrollPercentage < 0.85) {
+      // Only start showing when within 100px of the bottom
+      // Fully visible when at the very bottom (0px from bottom)
+      if (distanceFromBottom > 100) {
         setOpacity(0);
-      } else if (scrollPercentage >= 0.95) {
+      } else if (distanceFromBottom <= 0) {
         setOpacity(1);
       } else {
-        // Linear interpolation between 85% and 95%
-        const fadeProgress = (scrollPercentage - 0.85) / 0.10;
+        // Fade in as we approach the bottom
+        const fadeProgress = 1 - (distanceFromBottom / 100);
         setOpacity(fadeProgress);
       }
     };
@@ -49,9 +50,10 @@ export default function ContactForm() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Always render, but control visibility with opacity
-  // Also use pointer-events to prevent interaction when hidden
-  const isInteractive = opacity > 0.1;
+  // Don't render at all if completely invisible
+  if (opacity === 0) {
+    return null;
+  }
 
   return (
     <section
@@ -61,8 +63,7 @@ export default function ContactForm() {
         zIndex: 20,
         opacity: opacity,
         transition: 'opacity 0.3s ease-out',
-        pointerEvents: isInteractive ? 'auto' : 'none',
-        visibility: opacity > 0 ? 'visible' : 'hidden',
+        pointerEvents: opacity > 0.5 ? 'auto' : 'none',
         backgroundColor: bgLoaded && !bgError ? 'black' : '#f3f4f6'
       }}
     >
@@ -80,7 +81,7 @@ export default function ContactForm() {
         </div>
       )}
       
-      {/* Fallback gradient for loading/error state */}
+      {/* Fallback gradient */}
       {(!bgLoaded || bgError) && (
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-white via-gray-100 to-white" aria-hidden="true" />
       )}
