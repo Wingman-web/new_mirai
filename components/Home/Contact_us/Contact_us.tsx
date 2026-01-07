@@ -9,10 +9,15 @@ export default function ContactForm() {
   const [bgError, setBgError] = useState(false);
   const [opacity, setOpacity] = useState(0);
 
+  // Preload background image
   useEffect(() => {
     const img = new window.Image();
-    img.onload = () => setBgLoaded(true);
-    img.onerror = () => {
+    img.onload = () => {
+      console.log('Background image loaded successfully');
+      setBgLoaded(true);
+    };
+    img.onerror = (e) => {
+      console.error('Background image failed to load:', e);
       setBgLoaded(true);
       setBgError(true);
     };
@@ -29,19 +34,17 @@ export default function ContactForm() {
       const scrollTop = window.scrollY;
       const clientHeight = window.innerHeight;
       
-      // Calculate how far from the absolute bottom we are
+      // Calculate distance from bottom
       const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
       
-      // Only start showing when within 100px of the bottom
-      // Fully visible when at the very bottom (0px from bottom)
-      if (distanceFromBottom > 100) {
+      // Start showing when within 300px of bottom, fully visible at 50px
+      if (distanceFromBottom > 300) {
         setOpacity(0);
-      } else if (distanceFromBottom <= 0) {
+      } else if (distanceFromBottom <= 50) {
         setOpacity(1);
       } else {
-        // Fade in as we approach the bottom
-        const fadeProgress = 1 - (distanceFromBottom / 100);
-        setOpacity(fadeProgress);
+        const fadeProgress = 1 - ((distanceFromBottom - 50) / 250);
+        setOpacity(Math.max(0, Math.min(1, fadeProgress)));
       }
     };
 
@@ -50,7 +53,7 @@ export default function ContactForm() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Don't render at all if completely invisible
+  // Don't render if not visible
   if (opacity === 0) {
     return null;
   }
@@ -60,16 +63,24 @@ export default function ContactForm() {
       id="contact-section"
       className="fixed inset-0 flex items-center justify-start"
       style={{ 
-        zIndex: 20,
+        zIndex: 4, // Lower than Hero (5) so it sits behind everything
         opacity: opacity,
         transition: 'opacity 0.3s ease-out',
         pointerEvents: opacity > 0.5 ? 'auto' : 'none',
-        backgroundColor: bgLoaded && !bgError ? 'black' : '#f3f4f6'
       }}
     >
+      {/* Fallback solid background - always render this first */}
+      <div 
+        className="absolute inset-0" 
+        style={{ 
+          backgroundColor: bgError ? '#f3f4f6' : '#1a1a2e',
+          zIndex: 0 
+        }} 
+      />
+
       {/* Background Image */}
       {bgLoaded && !bgError && (
-        <div className="absolute inset-0 -z-10">
+        <div className="absolute inset-0" style={{ zIndex: 1 }}>
           <Image
             src={dayViewPath}
             alt="Day view"
@@ -77,16 +88,19 @@ export default function ContactForm() {
             priority
             unoptimized
             className="object-cover object-center"
+            onError={() => setBgError(true)}
           />
         </div>
       )}
       
-      {/* Fallback gradient */}
-      {(!bgLoaded || bgError) && (
-        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-white via-gray-100 to-white" aria-hidden="true" />
-      )}
+      {/* Gradient overlay for better text readability */}
+      <div 
+        className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" 
+        style={{ zIndex: 2 }}
+      />
       
-      <div className="relative z-10 h-full pl-6 lg:pl-12">
+      {/* Content */}
+      <div className="relative h-full pl-6 lg:pl-12" style={{ zIndex: 3 }}>
         <div className="flex items-center justify-start h-full">
           <div className="w-auto bg-white rounded-xl p-8 md:p-10 shadow-2xl" style={{ maxWidth: '340px' }}>
             <h2 className="text-3xl font-bold mb-8 text-gray-900 font-serif">Contact Us</h2>
