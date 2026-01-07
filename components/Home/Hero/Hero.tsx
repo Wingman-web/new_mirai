@@ -1,7 +1,6 @@
 'use client'
 import React, { useRef, useEffect } from 'react'
 import Image from 'next/image'
-
 const HERO_LOGO = '/images/logo_1.png'
 
 const Hero = () => {
@@ -22,32 +21,36 @@ const Hero = () => {
 
   useEffect(() => {
     if (typeof window === 'undefined') return
-
     Promise.all([import('gsap'), import('gsap/ScrollToPlugin')])
       .then(([gsapModule, scrollModule]) => {
         const gsap = gsapModule.gsap || gsapModule.default || gsapModule
         const ScrollToPlugin = scrollModule.ScrollToPlugin || scrollModule.default || scrollModule
-
         try {
           gsap.registerPlugin(ScrollToPlugin)
         } catch(e) {}
-
         gsapRef.current = gsap
       })
   }, [])
 
-  // Hide hero when scrolled near the bottom of the page
+  // Hide hero when scrolled past hero section OR when near the bottom (contact section)
   useEffect(() => {
     if (typeof window === 'undefined') return
-
     const handleScroll = () => {
       const scrollY = window.scrollY
       const windowHeight = window.innerHeight
+      const scrollHeight = document.documentElement.scrollHeight
       
-      // Hide the hero video once the user scrolls past the hero section
-      setIsHidden(scrollY >= windowHeight - 5)
+      // Calculate distance from bottom
+      const distanceFromBottom = scrollHeight - (scrollY + windowHeight)
+      
+      // Hide the hero video when:
+      // 1. User scrolls past the hero section (first viewport)
+      // 2. User is near the bottom of the page (within 200px - contact section area)
+      const pastHeroSection = scrollY >= windowHeight - 5
+      const nearBottom = distanceFromBottom < 200
+      
+      setIsHidden(pastHeroSection || nearBottom)
     }
-
     window.addEventListener('scroll', handleScroll, { passive: true })
     handleScroll() // Initial check
     return () => window.removeEventListener('scroll', handleScroll)
@@ -67,6 +70,11 @@ const Hero = () => {
     WebkitBackfaceVisibility: 'hidden',
     willChange: 'transform'
   };
+
+  // Don't render at all when hidden to save resources
+  if (isHidden) {
+    return null;
+  }
 
   return (
     <section className="fixed top-0 left-0 w-full h-screen overflow-hidden bg-black" style={{ zIndex: 5 }}>
@@ -100,7 +108,7 @@ const Hero = () => {
         preload="auto"
         style={{
           ...fullScreenMediaStyle,
-          opacity: isHidden ? 0 : (videoReady ? 1 : 0),
+          opacity: videoReady ? 1 : 0,
           transition: 'opacity 0.5s ease-in-out'
         }}
         onCanPlay={() => {
