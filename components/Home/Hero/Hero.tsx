@@ -1,58 +1,38 @@
 'use client'
-import React, { useRef, useEffect } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import Image from 'next/image'
+
 const HERO_LOGO = '/images/logo_1.png'
 
 const Hero = () => {
   const videoRef = useRef<HTMLVideoElement>(null)
-  const gsapRef = useRef<any>(null)
-  const [videoReady, setVideoReady] = React.useState(false)
-  const [isHidden, setIsHidden] = React.useState(false)
+  const [videoReady, setVideoReady] = useState(false)
+  const [isHidden, setIsHidden] = useState(false)
 
   useEffect(() => {
     if (typeof window !== 'undefined' && videoRef.current) {
-      videoRef.current.play().catch(() => {});
+      videoRef.current.play().catch(() => {})
     }
   }, [])
 
-  const handleCanPlay = () => {
-    if (videoRef.current) videoRef.current.play().catch(() => {})
-  }
-
+  // Hide hero when scrolled past hero section OR when near the bottom
   useEffect(() => {
     if (typeof window === 'undefined') return
-    Promise.all([import('gsap'), import('gsap/ScrollToPlugin')])
-      .then(([gsapModule, scrollModule]) => {
-        const gsap = gsapModule.gsap || gsapModule.default || gsapModule
-        const ScrollToPlugin = scrollModule.ScrollToPlugin || scrollModule.default || scrollModule
-        try {
-          gsap.registerPlugin(ScrollToPlugin)
-        } catch(e) {}
-        gsapRef.current = gsap
-      })
-  }, [])
-
-  // Hide hero when scrolled past hero section OR when near the bottom (contact section)
-  useEffect(() => {
-    if (typeof window === 'undefined') return
+    
     const handleScroll = () => {
       const scrollY = window.scrollY
       const windowHeight = window.innerHeight
       const scrollHeight = document.documentElement.scrollHeight
-      
-      // Calculate distance from bottom
       const distanceFromBottom = scrollHeight - (scrollY + windowHeight)
       
-      // Hide the hero video when:
-      // 1. User scrolls past the hero section (first viewport)
-      // 2. User is near the bottom of the page (within 200px - contact section area)
       const pastHeroSection = scrollY >= windowHeight - 5
       const nearBottom = distanceFromBottom < 200
       
       setIsHidden(pastHeroSection || nearBottom)
     }
+    
     window.addEventListener('scroll', handleScroll, { passive: true })
-    handleScroll() // Initial check
+    handleScroll()
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
@@ -69,21 +49,21 @@ const Hero = () => {
     backfaceVisibility: 'hidden',
     WebkitBackfaceVisibility: 'hidden',
     willChange: 'transform'
-  };
-
-  // Don't render at all when hidden to save resources
-  if (isHidden) {
-    return null;
   }
 
   return (
-    <section className="fixed top-0 left-0 w-full h-screen overflow-hidden bg-black" style={{ zIndex: 5 }}>
+    <section 
+      className="fixed top-0 left-0 w-full h-screen overflow-hidden bg-black transition-opacity duration-300"
+      style={{ 
+        zIndex: 5,
+        opacity: isHidden ? 0 : 1,
+        visibility: isHidden ? 'hidden' : 'visible',
+        pointerEvents: isHidden ? 'none' : 'auto'
+      }}
+    >
       {/* Logo - top center with full-width lines */}
       <div className="absolute top-8 left-0 right-0 z-10 flex items-center px-8">
-        {/* Left line */}
         <div className="flex-1 h-[1px] bg-white/60"></div>
-        
-        {/* Logo */}
         <div className="mx-6">
           <Image
             src={HERO_LOGO}
@@ -93,10 +73,18 @@ const Hero = () => {
             priority
           />
         </div>
-        
-        {/* Right line */}
         <div className="flex-1 h-[1px] bg-white/60"></div>
       </div>
+
+      {/* Loading placeholder - shows while video loads */}
+      {!videoReady && (
+        <div 
+          className="absolute inset-0 bg-black z-0"
+          style={{
+            backgroundImage: 'linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%)'
+          }}
+        />
+      )}
 
       {/* Video Background */}
       <video
@@ -111,10 +99,7 @@ const Hero = () => {
           opacity: videoReady ? 1 : 0,
           transition: 'opacity 0.5s ease-in-out'
         }}
-        onCanPlay={() => {
-          handleCanPlay();
-          setVideoReady(true);
-        }}
+        onCanPlayThrough={() => setVideoReady(true)}
         onLoadedData={() => setVideoReady(true)}
       >
         <source 
