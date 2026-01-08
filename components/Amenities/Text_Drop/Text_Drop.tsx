@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -11,122 +11,130 @@ const textDropLines = [
   { text: 'Your Element', image: 'https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&q=80' },
 ];
 
-// Inner component that handles the animation
-function AnimatedContent({ animationKey }: { animationKey: number }) {
+export default function MiraiAmenitiesShowcase() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const textContainerRef = useRef<HTMLDivElement>(null);
   const textRefs = useRef<(HTMLDivElement | null)[]>([]);
   const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
-    // Register plugin
+    // Register GSAP plugin
     gsap.registerPlugin(ScrollTrigger);
-    
+
     const section = sectionRef.current;
-    const textContainer = textContainerRef.current;
-    if (!section || !textContainer) return;
+    if (!section) return;
 
-    // Small delay to ensure DOM is ready
-    const initTimer = setTimeout(() => {
-      const ctx = gsap.context(() => {
-        // Set initial states for text
-        textRefs.current.forEach((textEl, idx) => {
-          if (!textEl) return;
-          
-          if (idx === 0) {
-            gsap.set(textEl, { 
-              rotateX: 0,
-              opacity: 1,
-              transformOrigin: 'center top',
-            });
-          } else {
-            gsap.set(textEl, { 
-              rotateX: -90,
-              opacity: 0,
-              transformOrigin: 'center top',
-            });
-          }
+    // Kill any existing ScrollTriggers for clean slate
+    ScrollTrigger.getAll().forEach(st => st.kill());
+
+    const ctx = gsap.context(() => {
+      // Set initial states for text elements
+      textRefs.current.forEach((textEl, idx) => {
+        if (!textEl) return;
+        gsap.set(textEl, {
+          rotateX: idx === 0 ? 0 : -90,
+          opacity: idx === 0 ? 1 : 0,
+          transformOrigin: 'center top',
+          force3D: true,
         });
+      });
 
-        // Set initial states for images
-        imageRefs.current.forEach((imgEl) => {
-          if (!imgEl) return;
-          gsap.set(imgEl, { scale: 0.8, opacity: 0 });
+      // Set initial states for image elements
+      imageRefs.current.forEach((imgEl) => {
+        if (!imgEl) return;
+        gsap.set(imgEl, { 
+          scale: 0.8, 
+          opacity: 0,
+          force3D: true,
         });
+      });
 
-        // Refresh ScrollTrigger
-        ScrollTrigger.refresh(true);
+      // Text animation - uses toggleActions instead of scrub
+      // This plays the animation when entering, and resets when leaving (scrolling back up)
+      const textTl = gsap.timeline({
+        paused: true, // Start paused
+      });
 
-        // Text animation timeline
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: section,
-            start: 'top 60%',
-            end: 'bottom 40%',
-            scrub: 1,
-            invalidateOnRefresh: true,
+      textRefs.current.forEach((textEl, idx) => {
+        if (!textEl || idx === 0) return;
+        textTl.to(
+          textEl,
+          {
+            rotateX: 0,
+            opacity: 1,
+            duration: 0.8,
+            ease: 'power2.out',
           },
-        });
+          (idx - 1) * 0.2
+        );
+      });
 
-        textRefs.current.forEach((textEl, idx) => {
-          if (!textEl || idx === 0) return;
-          
-          tl.to(
-            textEl,
-            {
-              rotateX: 0,
-              opacity: 1,
-              duration: 1,
-              ease: 'power2.out',
-            },
-            (idx - 1) * 0.25
-          );
-        });
+      // Image animation timeline
+      const imageTl = gsap.timeline({
+        paused: true,
+      });
 
-        // Images animation timeline
-        const tlImages = gsap.timeline({
-          scrollTrigger: {
-            trigger: section,
-            start: 'top 70%',
-            end: 'center center',
-            scrub: 1,
-            invalidateOnRefresh: true,
+      imageRefs.current.forEach((imgEl, idx) => {
+        if (!imgEl) return;
+        imageTl.to(
+          imgEl,
+          {
+            scale: 1,
+            opacity: 0.8,
+            duration: 0.8,
+            ease: 'power2.out',
           },
-        });
+          idx * 0.1
+        );
+      });
 
-        imageRefs.current.forEach((imgEl, idx) => {
-          if (!imgEl) return;
-          tlImages.to(
-            imgEl,
-            {
-              scale: 1,
-              opacity: 0.8,
-              duration: 1,
-              ease: 'power2.out',
-            },
-            idx * 0.15
-          );
-        });
-      }, section);
+      // Create ScrollTrigger that plays/reverses the animation
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 80%', // Starts when top of section hits 80% of viewport
+        end: 'bottom 20%',
+        // play on enter, reverse on leave back, play on enter back, reverse on leave
+        toggleActions: 'play reverse play reverse',
+        onEnter: () => {
+          textTl.play();
+          imageTl.play();
+        },
+        onLeaveBack: () => {
+          textTl.reverse();
+          imageTl.reverse();
+        },
+        onEnterBack: () => {
+          textTl.play();
+          imageTl.play();
+        },
+        onLeave: () => {
+          // Optional: keep animation complete when scrolling past
+        },
+      });
 
-      // Store context for cleanup
-      (section as any).__gsapContext = ctx;
+      // If section is already in view on load, play animation immediately
+      const rect = section.getBoundingClientRect();
+      const isInView = rect.top < window.innerHeight * 0.8;
+      
+      if (isInView) {
+        // Small delay to ensure everything is ready
+        gsap.delayedCall(0.1, () => {
+          textTl.play();
+          imageTl.play();
+        });
+      }
+
+    }, section);
+
+    // Refresh ScrollTrigger after a short delay
+    const refreshTimer = setTimeout(() => {
+      ScrollTrigger.refresh();
     }, 100);
 
     return () => {
-      clearTimeout(initTimer);
-      const ctx = (section as any)?.__gsapContext;
-      if (ctx) {
-        ctx.revert();
-      }
-      // Kill all ScrollTriggers associated with this section
-      ScrollTrigger.getAll().forEach(st => {
-        if (st.trigger === section) {
-          st.kill();
-        }
-      });
+      clearTimeout(refreshTimer);
+      ctx.revert();
     };
-  }, [animationKey]); // Re-run when key changes
+  }, []);
 
   return (
     <section
@@ -141,11 +149,7 @@ function AnimatedContent({ animationKey }: { animationKey: number }) {
           className="absolute top-4 left-4 md:top-6 md:left-6 lg:top-8 lg:left-8 w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
           style={{ opacity: 0, transform: 'scale(0.8)' }}
         >
-          <img
-            src={textDropLines[0].image}
-            alt={textDropLines[0].text}
-            className="w-full h-full object-cover"
-          />
+          <img src={textDropLines[0].image} alt={textDropLines[0].text} className="w-full h-full object-cover" />
         </div>
 
         <div
@@ -153,11 +157,7 @@ function AnimatedContent({ animationKey }: { animationKey: number }) {
           className="absolute top-[20%] left-[50%] -translate-x-1/2 w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
           style={{ opacity: 0, transform: 'scale(0.8)' }}
         >
-          <img
-            src={textDropLines[1].image}
-            alt={textDropLines[1].text}
-            className="w-full h-full object-cover"
-          />
+          <img src={textDropLines[1].image} alt={textDropLines[1].text} className="w-full h-full object-cover" />
         </div>
 
         <div
@@ -165,11 +165,7 @@ function AnimatedContent({ animationKey }: { animationKey: number }) {
           className="absolute bottom-4 right-[10%] md:bottom-6 md:right-[10%] lg:bottom-8 lg:right-[10%] w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
           style={{ opacity: 0, transform: 'scale(0.8)' }}
         >
-          <img
-            src={textDropLines[2].image}
-            alt={textDropLines[2].text}
-            className="w-full h-full object-cover"
-          />
+          <img src={textDropLines[2].image} alt={textDropLines[2].text} className="w-full h-full object-cover" />
         </div>
 
         <div
@@ -177,17 +173,12 @@ function AnimatedContent({ animationKey }: { animationKey: number }) {
           className="absolute bottom-4 left-[10%] md:bottom-6 md:left-[10%] lg:bottom-8 lg:left-[10%] w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
           style={{ opacity: 0, transform: 'scale(0.8)' }}
         >
-          <img
-            src={textDropLines[3].image}
-            alt={textDropLines[3].text}
-            className="w-full h-full object-cover"
-          />
+          <img src={textDropLines[3].image} alt={textDropLines[3].text} className="w-full h-full object-cover" />
         </div>
       </div>
 
       {/* Big Text */}
       <div 
-        ref={textContainerRef}
         className="relative z-10 flex flex-col items-center pt-4 md:pt-6 lg:pt-8 gap-6 md:gap-10 lg:gap-14"
         style={{ perspective: '1000px' }}
       >
@@ -205,9 +196,7 @@ function AnimatedContent({ animationKey }: { animationKey: number }) {
           >
             <div
               className="text-[clamp(3.5rem,10vw,8rem)] font-light tracking-[-0.02em] text-[#6B2C3E] leading-[1.1] text-center whitespace-nowrap"
-              style={{
-                fontFamily: '"Playfair Display", Georgia, serif',
-              }}
+              style={{ fontFamily: '"Playfair Display", Georgia, serif' }}
             >
               {item.text}
             </div>
@@ -220,30 +209,4 @@ function AnimatedContent({ animationKey }: { animationKey: number }) {
       `}</style>
     </section>
   );
-}
-
-// Wrapper component that forces remount on navigation
-export default function MiraiAmenitiesShowcase() {
-  const [key, setKey] = useState(0);
-
-  useEffect(() => {
-    // Generate new key on mount to force fresh animation
-    setKey(Date.now());
-    
-    // Also listen for route changes (Next.js)
-    const handleRouteChange = () => {
-      setKey(Date.now());
-    };
-
-    // For Next.js App Router
-    window.addEventListener('popstate', handleRouteChange);
-    
-    return () => {
-      window.removeEventListener('popstate', handleRouteChange);
-      // Clean up all ScrollTriggers on unmount
-      ScrollTrigger.getAll().forEach(st => st.kill());
-    };
-  }, []);
-
-  return <AnimatedContent key={key} animationKey={key} />;
 }
