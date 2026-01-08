@@ -13,6 +13,7 @@ export default function MiraiAmenitiesShowcase() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
     const trigger = triggerRef.current;
@@ -20,15 +21,23 @@ export default function MiraiAmenitiesShowcase() {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
+        const currentScrollY = window.scrollY;
+        const isScrollingDown = currentScrollY > lastScrollY.current;
+        lastScrollY.current = currentScrollY;
+
         if (entry.isIntersecting) {
+          // Entering viewport - always show
           setIsVisible(true);
         } else {
-          setIsVisible(false);
+          // Only hide if scrolling UP (trigger is below viewport)
+          // entry.boundingClientRect.top > 0 means trigger is below viewport (we scrolled up past it)
+          if (entry.boundingClientRect.top > 0) {
+            setIsVisible(false);
+          }
+          // If scrolling down and trigger is above viewport, keep it visible
         }
       },
       { 
-        // Negative bottom margin means element needs to be further into viewport
-        // -40% means the trigger element needs to be 40% up from the bottom of viewport
         rootMargin: '0px 0px -40% 0px',
         threshold: 0 
       }
