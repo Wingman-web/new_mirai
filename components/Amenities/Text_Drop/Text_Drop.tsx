@@ -11,11 +11,12 @@ const textDropLines = [
 
 export default function MiraiAmenitiesShowcase() {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
+    const trigger = triggerRef.current;
+    if (!trigger) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -26,12 +27,14 @@ export default function MiraiAmenitiesShowcase() {
         }
       },
       { 
-        rootMargin: '0px 0px -20% 0px', // Triggers when section is 20% into viewport
+        // Negative bottom margin means element needs to be further into viewport
+        // -40% means the trigger element needs to be 40% up from the bottom of viewport
+        rootMargin: '0px 0px -40% 0px',
         threshold: 0 
       }
     );
 
-    observer.observe(section);
+    observer.observe(trigger);
 
     return () => {
       observer.disconnect();
@@ -44,6 +47,13 @@ export default function MiraiAmenitiesShowcase() {
       className="relative min-h-screen pb-48 md:pb-64 lg:pb-80 bg-white overflow-hidden"
       style={{ perspective: '1000px' }}
     >
+      {/* Invisible trigger element positioned at the text area */}
+      <div 
+        ref={triggerRef} 
+        className="absolute top-[15%] left-0 w-full h-[1px] pointer-events-none"
+        aria-hidden="true"
+      />
+
       {/* Background Images */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         {/* Top Left Image */}
