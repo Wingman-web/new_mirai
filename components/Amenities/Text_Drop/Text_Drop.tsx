@@ -116,10 +116,10 @@ export default function MiraiAmenitiesShowcase() {
           />
         </div>
 
-        {/* Center Image - Behind text, moved left */}
+        {/* Center Image - Behind text, moved slightly right */}
         <div
           ref={(el) => { imageRefs.current[1] = el; }}
-          className="absolute top-[20%] left-[40%] -translate-x-1/2 w-[180px] h-[220px] sm:w-[220px] sm:h-[280px] lg:w-[280px] lg:h-[350px] rounded-lg overflow-hidden shadow-xl will-change-transform"
+          className="absolute top-[20%] left-[50%] -translate-x-1/2 w-[180px] h-[220px] sm:w-[220px] sm:h-[280px] lg:w-[280px] lg:h-[350px] rounded-lg overflow-hidden shadow-xl will-change-transform"
         >
           <img
             src={textDropLines[1].image}
