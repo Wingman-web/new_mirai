@@ -65,14 +65,14 @@ export default function MiraiAmenities() {
     marginBlock: '.83em',
     marginInline: 0,
     display: 'block',
-    fontSize: '48px',
+    fontSize: '64px',
     fontWeight: 500,
     fontFamily: 'Migra, serif',
     color: '#78252f'
   };
 
   return (
-    <section className="relative py-16 lg:py-32 bg-white overflow-hidden min-h-screen flex items-center">
+    <section className="relative py-8 lg:py-16 bg-white overflow-hidden min-h-screen flex items-center">
       <div className="container max-w-[1100px] mx-auto px-4 lg:px-6 relative z-10 w-full">
         <div className="text-center">
           <AnimatedElement delay={0} className="mb-6">
@@ -86,7 +86,7 @@ export default function MiraiAmenities() {
               fontSize: '20px',
               lineHeight: '1.4',
               fontWeight: '300',
-              fontFamily: 'system-ui, -apple-system, sans-serif',
+              fontFamily: 'Century Gothic, system-ui, -apple-system, sans-serif',
               display: 'block',
               marginBlockStart: '1em',
               marginBlockEnd: '1em',
@@ -102,7 +102,7 @@ export default function MiraiAmenities() {
               fontSize: '20px',
               lineHeight: '1.4',
               fontWeight: '300',
-              fontFamily: 'system-ui, -apple-system, sans-serif',
+              fontFamily: 'Century Gothic, system-ui, -apple-system, sans-serif',
               display: 'block',
               marginBlockStart: '1em',
               marginBlockEnd: '1em',
@@ -118,7 +118,7 @@ export default function MiraiAmenities() {
               fontSize: '20px',
               lineHeight: '1.4',
               fontWeight: '300',
-              fontFamily: 'system-ui, -apple-system, sans-serif',
+              fontFamily: 'Century Gothic, system-ui, -apple-system, sans-serif',
               display: 'block',
               marginBlockStart: '1em',
               marginBlockEnd: '1em',
