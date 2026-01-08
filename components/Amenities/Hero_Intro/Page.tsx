@@ -62,7 +62,7 @@ export default function MiraiAmenities() {
       <div className="container max-w-[1100px] mx-auto px-4 lg:px-6 relative z-10 w-full">
         <div className="text-center">
           <AnimatedElement delay={0} className="mb-6">
-            <h2 
+            <h1 
               style={{ 
                 fontFamily: 'Georgia, serif',
                 fontSize: '4rem',
@@ -73,7 +73,7 @@ export default function MiraiAmenities() {
               }}
             >
               Limitless Indulgence<br />For the Limited Few
-            </h2>
+            </h1>
           </AnimatedElement>
 
           <AnimatedElement delay={150} className="w-full mx-auto" style={{ marginTop: '30px' }}>
