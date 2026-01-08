@@ -57,28 +57,26 @@ const AnimatedElement: React.FC<AnimatedElementProps> = ({ delay = 0, children, 
 };
 
 export default function MiraiAmenities() {
+  const headingBase: React.CSSProperties = {
+    letterSpacing: '4px',
+    textRendering: 'optimizeLegibility',
+    WebkitFontSmoothing: 'antialiased',
+    unicodeBidi: 'isolate',
+    marginBlock: '.83em',
+    marginInline: 0,
+    display: 'block',
+    fontSize: '48px',
+    fontWeight: 250,
+    fontFamily: 'Migra, serif',
+    color: '#78252f'
+  };
+
   return (
     <section className="relative py-16 lg:py-32 bg-white overflow-hidden min-h-screen flex items-center">
       <div className="container max-w-[1100px] mx-auto px-4 lg:px-6 relative z-10 w-full">
         <div className="text-center">
           <AnimatedElement delay={0} className="mb-6">
-            <h1 
-              style={{ 
-                fontFamily: 'Georgia, serif',
-                fontSize: '48px',
-                lineHeight: '1.1',
-                fontWeight: 250,
-                color: '#78252f',
-                marginBottom: '2rem',
-                letterSpacing: '4px',
-                textRendering: 'optimizeLegibility',
-                WebkitFontSmoothing: 'antialiased',
-                unicodeBidi: 'isolate',
-                marginBlock: '.83em',
-                marginInline: 0,
-                display: 'block'
-              }}
-            >
+            <h1 style={headingBase}>
               Limitless Indulgence<br />For the Limited Few
             </h1>
           </AnimatedElement>
