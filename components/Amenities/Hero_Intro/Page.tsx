@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useEffect, useRef, useState } from 'react';
 
 const MiraiAmenities: React.FC = () => {
@@ -24,7 +23,6 @@ const MiraiAmenities: React.FC = () => {
     );
 
     observer.observe(box);
-
     return () => observer.disconnect();
   }, []);
 
@@ -71,7 +69,16 @@ const MiraiAmenities: React.FC = () => {
           `}
           style={{ perspective: '1000px', transformStyle: 'preserve-3d' }}
         >
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-light leading-tight tracking-tight text-[#8b4f4f] mb-8 sm:mb-12" style={{ fontFamily: 'serif' }}>
+          <h1 
+            className="mb-8 sm:mb-12" 
+            style={{ 
+              fontFamily: 'Migra, serif',
+              fontSize: '4rem',
+              lineHeight: '1.1',
+              fontWeight: 500,
+              color: '#78252f'
+            }}
+          >
             Limitless Indulgence<br />For the Limited Few
           </h1>
           
