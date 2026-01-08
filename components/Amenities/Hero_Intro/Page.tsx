@@ -10,8 +10,8 @@ interface AnimatedElementProps {
 
 const AnimatedElement: React.FC<AnimatedElementProps> = ({ delay = 0, children, className = '' }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const elementRef = useRef(null);
-  const timeoutRef = useRef(null);
+  const elementRef = useRef<HTMLDivElement>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const element = elementRef.current;
