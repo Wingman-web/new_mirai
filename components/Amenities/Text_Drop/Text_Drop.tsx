@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 
 const textDropLines = [
   { text: 'Indulgence', image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80' },
@@ -12,102 +12,167 @@ const textDropLines = [
 export default function MiraiAmenitiesShowcase() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
-  
-  // Refs for smooth interpolation (Lerping)
   const targetProgress = useRef(0);
   const currentProgress = useRef(0);
-  const requestRef = useRef<number>();
+  const rafId = useRef<number | null>(null);
+
+  // Smooth lerp (linear interpolation) for buttery animation
+  const lerp = (start: number, end: number, factor: number) => {
+    return start + (end - start) * factor;
+  };
+
+  const animate = useCallback(() => {
+    // Smooth interpolation - lower value = smoother but slower
+    const smoothFactor = 0.08;
+    
+    currentProgress.current = lerp(currentProgress.current, targetProgress.current, smoothFactor);
+    
+    // Only update state if there's meaningful change
+    if (Math.abs(currentProgress.current - targetProgress.current) > 0.0001) {
+      setScrollProgress(currentProgress.current);
+      rafId.current = requestAnimationFrame(animate);
+    } else {
+      setScrollProgress(targetProgress.current);
+    }
+  }, []);
 
   useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
     const handleScroll = () => {
-      if (!sectionRef.current) return;
-      const rect = sectionRef.current.getBoundingClientRect();
+      const rect = section.getBoundingClientRect();
       const windowHeight = window.innerHeight;
       
       const startPoint = windowHeight * 0.30;
       const endPoint = windowHeight * -0.30;
+      
       const totalDistance = startPoint - endPoint;
-      const currentPos = startPoint - rect.top;
+      const currentPosition = startPoint - rect.top;
       
-      const rawProgress = Math.max(0, Math.min(1, currentPos / totalDistance));
-      targetProgress.current = rawProgress;
-    };
-
-    // This loop creates the "smooth catch-up" effect
-    const smoothLoop = () => {
-      const lerpFactor = 0.1; // Lower = smoother/slower, Higher = snappier
-      const diff = targetProgress.current - currentProgress.current;
+      let progress = currentPosition / totalDistance;
+      progress = Math.max(0, Math.min(1, progress));
       
-      if (Math.abs(diff) > 0.0001) {
-        currentProgress.current += diff * lerpFactor;
-        setScrollProgress(currentProgress.current);
+      targetProgress.current = progress;
+      
+      // Start animation loop if not running
+      if (rafId.current === null) {
+        rafId.current = requestAnimationFrame(animate);
       }
-      requestRef.current = requestAnimationFrame(smoothLoop);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    requestRef.current = requestAnimationFrame(smoothLoop);
     handleScroll();
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+      if (rafId.current !== null) {
+        cancelAnimationFrame(rafId.current);
+      }
     };
-  }, []);
+  }, [animate]);
+
+  // Keep animation loop running while there's movement
+  useEffect(() => {
+    const checkAndAnimate = () => {
+      if (Math.abs(currentProgress.current - targetProgress.current) > 0.0001) {
+        rafId.current = requestAnimationFrame(animate);
+      } else {
+        rafId.current = null;
+      }
+    };
+    
+    checkAndAnimate();
+  }, [scrollProgress, animate]);
 
   const getTextProgress = (index: number) => {
     if (index === 0) return 1;
+    
     const staggerDelay = 0.20;
     const lineDuration = 0.50;
+    
     const lineStart = (index - 1) * staggerDelay;
     const lineEnd = lineStart + lineDuration;
-    return Math.max(0, Math.min(1, (scrollProgress - lineStart) / (lineEnd - lineStart)));
+    
+    const lineProgress = (scrollProgress - lineStart) / (lineEnd - lineStart);
+    return Math.max(0, Math.min(1, lineProgress));
   };
 
   const getImageProgress = (index: number) => {
     const staggerDelay = 0.12;
     const imageDuration = 0.6;
+    
     const imageStart = index * staggerDelay;
     const imageEnd = imageStart + imageDuration;
-    return Math.max(0, Math.min(1, (scrollProgress - imageStart) / (imageEnd - imageStart)));
+    
+    const imageProgress = (scrollProgress - imageStart) / (imageEnd - imageStart);
+    return Math.max(0, Math.min(1, imageProgress));
   };
 
-  const easeOutQuint = (t: number) => 1 - Math.pow(1 - t, 5);
+  // Ultra smooth easing
+  const easeOutExpo = (t: number) => t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
 
   return (
     <section
       ref={sectionRef}
       className="relative min-h-screen pb-48 md:pb-64 lg:pb-80 bg-white overflow-hidden"
+      style={{ perspective: '1200px' }}
     >
       {/* Background Images */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
-        {textDropLines.map((item, idx) => (
-          <div
-            key={`img-${idx}`}
-            className={`absolute w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform ${
-              idx === 0 ? 'top-8 left-8' : 
-              idx === 1 ? 'top-[20%] left-1/2 -translate-x-1/2' :
-              idx === 2 ? 'bottom-8 right-[10%]' : 'bottom-8 left-[10%]'
-            }`}
-            style={{
-              opacity: easeOutQuint(getImageProgress(idx)) * 0.8,
-              transform: `scale(${0.8 + easeOutQuint(getImageProgress(idx)) * 0.2}) translateZ(0)`,
-              transition: 'transform 0.2s ease-out, opacity 0.2s ease-out', // Smoothing micro-jitters
-            }}
-          >
-            <img src={item.image} alt="" className="w-full h-full object-cover" />
-          </div>
-        ))}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        {/* Top Left Image */}
+        <div
+          className="absolute top-4 left-4 md:top-6 md:left-6 lg:top-8 lg:left-8 w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
+          style={{
+            opacity: easeOutExpo(getImageProgress(0)) * 0.8,
+            transform: `scale(${0.8 + easeOutExpo(getImageProgress(0)) * 0.2})`,
+          }}
+        >
+          <img src={textDropLines[0].image} alt={textDropLines[0].text} className="w-full h-full object-cover" />
+        </div>
+
+        {/* Center Image */}
+        <div
+          className="absolute top-[20%] left-[50%] w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
+          style={{
+            opacity: easeOutExpo(getImageProgress(1)) * 0.8,
+            transform: `translateX(-50%) scale(${0.8 + easeOutExpo(getImageProgress(1)) * 0.2})`,
+          }}
+        >
+          <img src={textDropLines[1].image} alt={textDropLines[1].text} className="w-full h-full object-cover" />
+        </div>
+
+        {/* Bottom Right Image */}
+        <div
+          className="absolute bottom-4 right-[10%] md:bottom-6 md:right-[10%] lg:bottom-8 lg:right-[10%] w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
+          style={{
+            opacity: easeOutExpo(getImageProgress(2)) * 0.8,
+            transform: `scale(${0.8 + easeOutExpo(getImageProgress(2)) * 0.2})`,
+          }}
+        >
+          <img src={textDropLines[2].image} alt={textDropLines[2].text} className="w-full h-full object-cover" />
+        </div>
+
+        {/* Bottom Left Image */}
+        <div
+          className="absolute bottom-4 left-[10%] md:bottom-6 md:left-[10%] lg:bottom-8 lg:left-[10%] w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
+          style={{
+            opacity: easeOutExpo(getImageProgress(3)) * 0.8,
+            transform: `scale(${0.8 + easeOutExpo(getImageProgress(3)) * 0.2})`,
+          }}
+        >
+          <img src={textDropLines[3].image} alt={textDropLines[3].text} className="w-full h-full object-cover" />
+        </div>
       </div>
 
-      {/* Big Text Container */}
+      {/* Big Text */}
       <div 
-        className="relative z-10 flex flex-col items-center pt-12 gap-8 md:gap-14"
-        style={{ perspective: '2000px' }} // Deepened perspective for smoother looking rotation
+        className="relative z-10 flex flex-col items-center pt-4 md:pt-6 lg:pt-8 gap-6 md:gap-10 lg:gap-14"
+        style={{ perspective: '1200px' }}
       >
         {textDropLines.map((item, idx) => {
           const progress = getTextProgress(idx);
-          const easedProgress = easeOutQuint(progress);
+          const easedProgress = easeOutExpo(progress);
           
           return (
             <div 
@@ -115,13 +180,12 @@ export default function MiraiAmenitiesShowcase() {
               className="will-change-transform"
               style={{ 
                 transformStyle: 'preserve-3d',
-                transformOrigin: '50% 0%',
-                backfaceVisibility: 'hidden',
+                transformOrigin: 'center top',
                 opacity: idx === 0 ? 1 : easedProgress,
                 transform: idx === 0 
-                  ? 'rotateX(0deg) translateZ(0)' 
-                  : `rotateX(${-90 + easedProgress * 90}deg) translateZ(0)`,
-                transition: 'transform 0.1s linear', // Final polish for frame gaps
+                  ? 'rotateX(0deg)' 
+                  : `rotateX(${-90 + easedProgress * 90}deg)`,
+                backfaceVisibility: 'hidden',
               }}
             >
               <div
