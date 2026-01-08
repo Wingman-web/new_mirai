@@ -82,17 +82,52 @@ const MiraiAmenities: React.FC = () => {
             Limitless Indulgence<br />For the Limited Few
           </h1>
           
-          <p className="text-[#5a5a5a] text-base sm:text-lg lg:text-xl leading-relaxed mb-6 max-w-4xl mx-auto" style={{ fontFamily: 'sans-serif' }}>
-            Experience leisure in every corner at Mirai with 2,00,000 sq. ft. amenities curated just for you.
-          </p>
-          
-          <p className="text-[#5a5a5a] text-base sm:text-lg lg:text-xl leading-relaxed mb-6 max-w-4xl mx-auto" style={{ fontFamily: 'sans-serif' }}>
-            From the podium to the element pods & the gigantic Clubhouse, Mirai has everything you desire to beat moments of monotony and transform them into core memories.
-          </p>
-          
-          <p className="text-[#5a5a5a] text-base sm:text-lg lg:text-xl leading-relaxed m-0 max-w-4xl mx-auto" style={{ fontFamily: 'sans-serif' }}>
-            The Podium-level amenities comprise varied landscapes and lush gardens to keep you rooted to nature. The lavish Clubhouse spread across 1,01,415 host a myriad of amenities spread across 4 dynamic levels. The Pods on the terrace are an extension of space where one can truly connect and feel one with the different elements that birthed Mirai.
-          </p>
+          <div className="max-w-4xl mx-auto" style={{ marginTop: '30px' }}>
+            <p style={{ 
+              fontSize: '20px',
+              lineHeight: '1.4',
+              fontWeight: 500,
+              fontFamily: 'Century Gothic, sans-serif',
+              display: 'block',
+              marginBlockStart: '1em',
+              marginBlockEnd: '1em',
+              marginInlineStart: '0px',
+              marginInlineEnd: '0px',
+              unicodeBidi: 'isolate'
+            }}>
+              Experience leisure in every corner at Mirai with 2,00,000 sq. ft. amenities curated just for you.
+            </p>
+            
+            <p style={{ 
+              fontSize: '20px',
+              lineHeight: '1.4',
+              fontWeight: 500,
+              fontFamily: 'Century Gothic, sans-serif',
+              display: 'block',
+              marginBlockStart: '1em',
+              marginBlockEnd: '1em',
+              marginInlineStart: '0px',
+              marginInlineEnd: '0px',
+              unicodeBidi: 'isolate'
+            }}>
+              From the podium to the element pods & the gigantic Clubhouse, Mirai has everything you desire to beat moments of monotony and transform them into core memories.
+            </p>
+            
+            <p style={{ 
+              fontSize: '20px',
+              lineHeight: '1.4',
+              fontWeight: 500,
+              fontFamily: 'Century Gothic, sans-serif',
+              display: 'block',
+              marginBlockStart: '1em',
+              marginBlockEnd: '1em',
+              marginInlineStart: '0px',
+              marginInlineEnd: '0px',
+              unicodeBidi: 'isolate'
+            }}>
+              The Podium-level amenities comprise varied landscapes and lush gardens to keep you rooted to nature. The lavish Clubhouse spread across 1,01,415 host a myriad of amenities spread across 4 dynamic levels. The Pods on the terrace are an extension of space where one can truly connect and feel one with the different elements that birthed Mirai.
+            </p>
+          </div>
         </div>
       </div>
     </div>
