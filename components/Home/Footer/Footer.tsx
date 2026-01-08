@@ -65,12 +65,13 @@ const BackToTopButton = memo<BackToTopProps>(({ show, progress, onClick }) => {
   return (
     <button
       onClick={onClick}
-      className={`fixed right-5 bottom-5 w-14 h-14 rounded-full bg-white/3 flex items-center justify-center cursor-pointer z-50 transition-all duration-300 hover:bg-white/6 ${
+      className={`fixed right-5 bottom-5 w-14 h-14 rounded-full bg-white/3 flex items-center justify-center cursor-pointer transition-all duration-300 hover:bg-white/6 ${
         show ? 'opacity-95' : 'opacity-0 pointer-events-none'
       }`}
+      style={{ zIndex: 9999 }}
       aria-label="Scroll to top"
     >
-      <svg className="w-11 h-11" viewBox="-1 -1 102 102">
+      <svg className="w-11 h-11 absolute" viewBox="-1 -1 102 102">
         <path
           d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98"
           fill="none"
@@ -79,6 +80,17 @@ const BackToTopButton = memo<BackToTopProps>(({ show, progress, onClick }) => {
           strokeLinecap="round"
           style={strokeStyle}
         />
+      </svg>
+      <svg 
+        className="w-6 h-6" 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="white" 
+        strokeWidth="2.5" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+      >
+        <polyline points="18 15 12 9 6 15"></polyline>
       </svg>
     </button>
   );
