@@ -21,10 +21,10 @@ export default function MiraiAmenitiesShowcase() {
       const rect = section.getBoundingClientRect();
       const windowHeight = window.innerHeight;
       
-      // Start when section top reaches 60% of viewport
-      // End when section top reaches 10% of viewport
-      const startPoint = windowHeight * 0.6;
-      const endPoint = windowHeight * 0.1;
+      // Start when section top reaches 30% from top of viewport (section is well visible)
+      // End when section top reaches -10% (slightly above viewport)
+      const startPoint = windowHeight * 0.30;
+      const endPoint = windowHeight * -0.10;
       
       // Calculate progress (0 to 1)
       const totalDistance = startPoint - endPoint;
