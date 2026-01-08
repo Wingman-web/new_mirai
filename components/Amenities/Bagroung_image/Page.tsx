@@ -1,4 +1,5 @@
 'use client';
+
 import { useEffect, useState } from 'react';
 
 export default function Footer() {
@@ -30,62 +31,12 @@ export default function Footer() {
   const pathLength = 307.919;
 
   return (
-    <footer
-      className="relative h-screen bg-[#050505]"
-      style={{ zIndex: 10 }}
-      role="contentinfo"
-      aria-label="Footer - Pavani Mirai"
-    >
-      <div
-        className="absolute inset-0 bg-center bg-no-repeat"
-        style={{
-          backgroundImage: "url('/images/night_view.png')",
-          backgroundSize: 'cover',
-          backgroundAttachment: 'fixed',
-          backgroundPosition: 'center',
-        }}
-        aria-hidden="true"
+    <footer className="relative w-full h-96">
+      <img 
+        src="https://azure-baboon-302476.hostingersite.com/mirai_latest/media/lobby.png"
+        alt="Footer"
+        className="w-full h-full object-cover"
       />
-      
-      {/* Logo with Lines */}
-      <div className="absolute top-8 left-0 right-0 z-20 flex items-center px-8">
-        <div className="flex-1 h-[1px] bg-white"></div>
-        <div className="px-8">
-          <img
-            src="https://azure-baboon-302476.hostingersite.com/mirai_latest/media/logo.png"
-            alt="Pavani Mirai Logo"
-            className="h-16 w-auto"
-          />
-        </div>
-        <div className="flex-1 h-[1px] bg-white"></div>
-      </div>
-
-      {/* Back to Top Button */}
-      <button
-        onClick={scrollToTop}
-        className={`fixed right-5 bottom-5 w-14 h-14 rounded-full bg-white/3 flex items-center justify-center cursor-pointer z-50 transition-all duration-300 hover:bg-white/6 ${
-          showBackToTop ? 'opacity-95' : 'opacity-0 pointer-events-none'
-        }`}
-        aria-label="Scroll to top"
-      >
-        <svg 
-          className="w-11 h-11" 
-          viewBox="-1 -1 102 102"
-        >
-          <path
-            d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98"
-            fill="none"
-            stroke="#ffffff"
-            strokeWidth="6"
-            strokeLinecap="round"
-            style={{
-              strokeDasharray: `${pathLength} ${pathLength}`,
-              strokeDashoffset: pathLength * (1 - scrollProgress),
-              transition: 'stroke-dashoffset 150ms linear'
-            }}
-          />
-        </svg>
-      </button>
     </footer>
   );
 }
