@@ -65,12 +65,18 @@ export default function MiraiAmenities() {
             <h1 
               style={{ 
                 fontFamily: 'Georgia, serif',
-                fontSize: '4rem',
+                fontSize: '48px',
                 lineHeight: '1.1',
-                fontWeight: 300,
+                fontWeight: 250,
                 color: '#78252f',
                 marginBottom: '2rem',
-                letterSpacing: '-0.02em'
+                letterSpacing: '4px',
+                textRendering: 'optimizeLegibility',
+                WebkitFontSmoothing: 'antialiased',
+                unicodeBidi: 'isolate',
+                marginBlock: '.83em',
+                marginInline: 0,
+                display: 'block'
               }}
             >
               Limitless Indulgence<br />For the Limited Few
