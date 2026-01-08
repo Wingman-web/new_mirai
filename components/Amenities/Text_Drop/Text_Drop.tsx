@@ -11,28 +11,25 @@ const textDropLines = [
 
 export default function MiraiAmenitiesShowcase() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const [smoothProgress, setSmoothProgress] = useState(0);
   const targetProgress = useRef(0);
   const currentProgress = useRef(0);
   const rafId = useRef<number | null>(null);
 
-  // Smooth lerp (linear interpolation) for buttery animation
   const lerp = (start: number, end: number, factor: number) => {
     return start + (end - start) * factor;
   };
 
   const animate = useCallback(() => {
-    // Smooth interpolation - lower value = smoother but slower
     const smoothFactor = 0.08;
     
     currentProgress.current = lerp(currentProgress.current, targetProgress.current, smoothFactor);
+    setSmoothProgress(currentProgress.current);
     
-    // Only update state if there's meaningful change
     if (Math.abs(currentProgress.current - targetProgress.current) > 0.0001) {
-      setScrollProgress(currentProgress.current);
       rafId.current = requestAnimationFrame(animate);
     } else {
-      setScrollProgress(targetProgress.current);
+      rafId.current = null;
     }
   }, []);
 
@@ -55,7 +52,6 @@ export default function MiraiAmenitiesShowcase() {
       
       targetProgress.current = progress;
       
-      // Start animation loop if not running
       if (rafId.current === null) {
         rafId.current = requestAnimationFrame(animate);
       }
@@ -72,44 +68,40 @@ export default function MiraiAmenitiesShowcase() {
     };
   }, [animate]);
 
-  // Keep animation loop running while there's movement
-  useEffect(() => {
-    const checkAndAnimate = () => {
-      if (Math.abs(currentProgress.current - targetProgress.current) > 0.0001) {
-        rafId.current = requestAnimationFrame(animate);
-      } else {
-        rafId.current = null;
-      }
-    };
-    
-    checkAndAnimate();
-  }, [scrollProgress, animate]);
-
+  // Fixed progress calculation for each text line
   const getTextProgress = (index: number) => {
-    if (index === 0) return 1;
+    if (index === 0) return 1; // First line always visible
     
-    const staggerDelay = 0.20;
-    const lineDuration = 0.50;
+    // Each line animates over a portion of the total scroll
+    // Line 1 (index 1): 0% - 40%
+    // Line 2 (index 2): 20% - 60%
+    // Line 3 (index 3): 40% - 80%
+    const staggerOffset = 0.20; // 20% offset between each line start
+    const animationDuration = 0.40; // Each line takes 40% of scroll to complete
     
-    const lineStart = (index - 1) * staggerDelay;
-    const lineEnd = lineStart + lineDuration;
+    const lineStart = (index - 1) * staggerOffset;
+    const lineEnd = lineStart + animationDuration;
     
-    const lineProgress = (scrollProgress - lineStart) / (lineEnd - lineStart);
-    return Math.max(0, Math.min(1, lineProgress));
+    if (smoothProgress <= lineStart) return 0;
+    if (smoothProgress >= lineEnd) return 1;
+    
+    return (smoothProgress - lineStart) / animationDuration;
   };
 
   const getImageProgress = (index: number) => {
-    const staggerDelay = 0.12;
-    const imageDuration = 0.6;
+    const staggerOffset = 0.15;
+    const animationDuration = 0.50;
     
-    const imageStart = index * staggerDelay;
-    const imageEnd = imageStart + imageDuration;
+    const imageStart = index * staggerOffset;
+    const imageEnd = imageStart + animationDuration;
     
-    const imageProgress = (scrollProgress - imageStart) / (imageEnd - imageStart);
-    return Math.max(0, Math.min(1, imageProgress));
+    if (smoothProgress <= imageStart) return 0;
+    if (smoothProgress >= imageEnd) return 1;
+    
+    return (smoothProgress - imageStart) / animationDuration;
   };
 
-  // Ultra smooth easing
+  // Smooth easing
   const easeOutExpo = (t: number) => t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
 
   return (
