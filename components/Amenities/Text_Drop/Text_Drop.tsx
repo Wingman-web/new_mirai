@@ -140,10 +140,10 @@ export default function MiraiAmenitiesShowcase() {
           />
         </div>
 
-        {/* Bottom Right Image */}
+        {/* Fourth Image - Bottom Left Corner */}
         <div
           ref={(el) => { imageRefs.current[3] = el; }}
-          className="absolute bottom-40 right-[15%] w-[180px] h-[220px] sm:w-[220px] sm:h-[280px] lg:w-[280px] lg:h-[350px] rounded-lg overflow-hidden shadow-xl will-change-transform"
+          className="absolute bottom-4 left-4 md:bottom-6 md:left-6 lg:bottom-8 lg:left-8 w-[180px] h-[220px] sm:w-[220px] sm:h-[280px] lg:w-[280px] lg:h-[350px] rounded-lg overflow-hidden shadow-xl will-change-transform"
         >
           <img
             src={textDropLines[3].image}
