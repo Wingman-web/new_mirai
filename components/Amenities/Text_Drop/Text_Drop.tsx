@@ -128,10 +128,10 @@ export default function MiraiAmenitiesShowcase() {
           />
         </div>
 
-        {/* Third Image - Bottom Right Corner (moved left) */}
+        {/* Third Image - Bottom Right Corner (moved slightly right) */}
         <div
           ref={(el) => { imageRefs.current[2] = el; }}
-          className="absolute bottom-4 right-[15%] md:bottom-6 md:right-[15%] lg:bottom-8 lg:right-[15%] w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
+          className="absolute bottom-4 right-[10%] md:bottom-6 md:right-[10%] lg:bottom-8 lg:right-[10%] w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
         >
           <img
             src={textDropLines[2].image}
@@ -140,10 +140,10 @@ export default function MiraiAmenitiesShowcase() {
           />
         </div>
 
-        {/* Fourth Image - Bottom Left Corner (moved right) */}
+        {/* Fourth Image - Bottom Left Corner (moved slightly left) */}
         <div
           ref={(el) => { imageRefs.current[3] = el; }}
-          className="absolute bottom-4 left-[15%] md:bottom-6 md:left-[15%] lg:bottom-8 lg:left-[15%] w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
+          className="absolute bottom-4 left-[10%] md:bottom-6 md:left-[10%] lg:bottom-8 lg:left-[10%] w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
         >
           <img
             src={textDropLines[3].image}
