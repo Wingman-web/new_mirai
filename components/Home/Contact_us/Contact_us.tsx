@@ -7,64 +7,131 @@ const DAY_VIEW_PATH = '/images/day_view.png';
 
 const ContactForm = memo(function ContactForm() {
   return (
-    <section
-      id="contact-section"
-      className="fixed inset-0 flex items-center justify-start bg-black"
-      style={{ zIndex: 1 }}
-    >
+    <div className="relative w-full min-h-screen flex items-center justify-center p-4">
       {/* Background Image */}
-      <div className="absolute inset-0 -z-10">
-        <Image
-          src={DAY_VIEW_PATH}
-          alt=""
-          fill
-          sizes="100vw"
-          quality={75}
-          className="object-cover object-center"
-          priority
-        />
-      </div>
+      <Image
+        src={DAY_VIEW_PATH}
+        alt="Background"
+        fill
+        className="object-cover"
+        priority
+      />
 
       {/* Form Container */}
-      <div className="relative z-10 h-full pl-6 lg:pl-12">
-        <div className="flex items-center justify-start h-full">
-          {/* Glassmorphism Card */}
-          <div 
-            className="w-auto rounded-2xl p-8 md:p-10 shadow-2xl backdrop-blur-xl bg-white/20 border border-white/30"
-            style={{ maxWidth: '340px' }}
+      <div className="relative z-10 w-full max-w-2xl">
+        {/* Glassmorphism Card */}
+        <div
+          className="rounded-2xl p-10 md:p-12"
+          style={{
+            background: 'rgba(255, 255, 255, 0.75)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+          }}
+        >
+          {/* Title */}
+          <h2
+            className="text-2xl md:text-3xl tracking-[0.3em] mb-10"
+            style={{
+              fontFamily: 'Georgia, "Times New Roman", serif',
+              color: '#1a2a3a',
+              fontWeight: 400,
+            }}
           >
-            <h2 className="text-3xl font-bold mb-8 text-white font-serif drop-shadow-lg">
-              Contact Us
-            </h2>
-            
-            <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-              <input 
+            CONTACT US
+          </h2>
+
+          {/* Form */}
+          <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
+            {/* Name Input */}
+            <div className="border-b border-gray-300">
+              <input
                 type="text"
-                name="name"
-                placeholder="Name *" 
-                required
-                autoComplete="name"
-                className="w-full px-4 py-4 bg-white/10 backdrop-blur-sm border-b-2 border-white/40 outline-none text-white placeholder-white/70 focus:border-white focus:bg-white/20 transition-all rounded-t-lg" 
+                placeholder="Name"
+                className="w-full bg-transparent py-4 outline-none placeholder-opacity-100"
+                style={{
+                  fontFamily: 'Georgia, "Times New Roman", serif',
+                  color: '#722F37',
+                  fontSize: '1rem',
+                }}
               />
-              <input 
+              <style jsx>{`
+                input::placeholder {
+                  color: #722F37;
+                  opacity: 1;
+                  font-family: Georgia, "Times New Roman", serif;
+                }
+              `}</style>
+            </div>
+
+            {/* Email Input */}
+            <div className="border-b border-gray-300">
+              <input
                 type="email"
-                name="email"
-                placeholder="Email *" 
-                required
-                autoComplete="email"
-                className="w-full px-4 py-4 bg-white/10 backdrop-blur-sm border-b-2 border-white/40 outline-none text-white placeholder-white/70 focus:border-white focus:bg-white/20 transition-all rounded-t-lg" 
+                placeholder="Email"
+                className="w-full bg-transparent py-4 outline-none"
+                style={{
+                  fontFamily: 'Georgia, "Times New Roman", serif',
+                  color: '#722F37',
+                  fontSize: '1rem',
+                }}
               />
-              <button 
-                type="submit"
-                className="w-full bg-white/25 backdrop-blur-sm text-white py-4 rounded-lg font-bold border border-white/40 hover:bg-white/40 hover:shadow-lg transition-all duration-300"
+            </div>
+
+            {/* Number Input */}
+            <div className="border-b border-gray-300">
+              <input
+                type="tel"
+                placeholder="Number"
+                className="w-full bg-transparent py-4 outline-none"
+                style={{
+                  fontFamily: 'Georgia, "Times New Roman", serif',
+                  color: '#722F37',
+                  fontSize: '1rem',
+                }}
+              />
+            </div>
+
+            {/* Terms Checkbox */}
+            <div className="flex items-center gap-3 pt-4">
+              <input
+                type="checkbox"
+                id="terms"
+                className="w-4 h-4 border-2 border-gray-400 rounded-sm accent-[#722F37] cursor-pointer"
+                style={{
+                  accentColor: '#722F37',
+                }}
+              />
+              <label
+                htmlFor="terms"
+                className="cursor-pointer"
+                style={{
+                  fontFamily: 'Georgia, "Times New Roman", serif',
+                  color: '#1a2a3a',
+                  fontSize: '0.95rem',
+                }}
               >
-                SUBMIT
-              </button>
-            </form>
-          </div>
+                I accept the terms and conditions
+              </label>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              className="w-full py-5 rounded-xl mt-6 transition-all duration-300 hover:opacity-90 active:scale-[0.98]"
+              style={{
+                background: '#722F37',
+                fontFamily: 'Georgia, "Times New Roman", serif',
+                color: '#ffffff',
+                fontSize: '1rem',
+                letterSpacing: '0.15em',
+              }}
+            >
+              Submit Form
+            </button>
+          </form>
         </div>
       </div>
-    </section>
+    </div>
   );
 });
 
