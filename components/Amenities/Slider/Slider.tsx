@@ -201,8 +201,8 @@ const Carousel = ({
 
           // Calculate positions that keep images fully visible
           // Center image: 50% (centered)
-          // Right image: 83% (positioned to the right with good spacing)
-          // Left image: 17% (positioned to the left with good spacing)
+          // Right image: 87% (positioned further to the right)
+          // Left image: 13% (positioned further to the left)
           let position = 'left-1/2 -translate-x-1/2';
           let width = 'w-[45%]';
           let zIndex = 'z-30';
@@ -210,18 +210,18 @@ const Carousel = ({
           let scale = 'scale-100';
 
           if (!isActive) {
-            // Right Side Image - Positioned at 83% for more separation
+            // Right Side Image - Positioned at 87% for more separation
             if (offset === 1) {
-              position = 'left-[83%] -translate-x-1/2'; 
-              width = 'w-[25%]';
+              position = 'left-[87%] -translate-x-1/2'; 
+              width = 'w-[22%]';
               zIndex = 'z-20';
               opacity = 'opacity-70';
               scale = 'scale-90';
             } 
-            // Left Side Image - Positioned at 17% for more separation
+            // Left Side Image - Positioned at 13% for more separation
             else if (offset === 2) {
-              position = 'left-[17%] -translate-x-1/2';
-              width = 'w-[25%]';
+              position = 'left-[13%] -translate-x-1/2';
+              width = 'w-[22%]';
               zIndex = 'z-10';
               opacity = 'opacity-50';
               scale = 'scale-[0.85]';
