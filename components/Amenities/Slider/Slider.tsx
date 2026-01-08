@@ -190,8 +190,8 @@ const Carousel = ({
   onPrev: () => void;
 }) => {
   return (
-    <div className="relative w-full h-[550px] mb-10 rounded-2xl flex items-center justify-center">
-      <div className="relative w-full h-full flex items-center justify-center overflow-visible">
+    <div className="relative w-full h-[550px] mb-10 rounded-2xl flex items-center justify-center overflow-hidden">
+      <div className="relative w-full h-full flex items-center justify-center">
         {items.map((item, index) => {
           const offset = (index - currentIndex + items.length) % items.length;
           const isActive = offset === 0;
@@ -199,7 +199,10 @@ const Carousel = ({
 
           if (!isVisible) return null;
 
-          // Default styling for Center Image
+          // Calculate positions that keep images fully visible
+          // Center image: 50% (centered)
+          // Right image: 83% (positioned to the right with good spacing)
+          // Left image: 17% (positioned to the left with good spacing)
           let position = 'left-1/2 -translate-x-1/2';
           let width = 'w-[45%]';
           let zIndex = 'z-30';
@@ -207,21 +210,21 @@ const Carousel = ({
           let scale = 'scale-100';
 
           if (!isActive) {
-            // Right Side Image - Positioned at 90%
+            // Right Side Image - Positioned at 83% for more separation
             if (offset === 1) {
-              position = 'left-[90%] -translate-x-1/2'; 
-              width = 'w-[28%]';
+              position = 'left-[83%] -translate-x-1/2'; 
+              width = 'w-[25%]';
               zIndex = 'z-20';
               opacity = 'opacity-70';
               scale = 'scale-90';
             } 
-            // Left Side Image - Positioned at 10%
+            // Left Side Image - Positioned at 17% for more separation
             else if (offset === 2) {
-              position = 'left-[10%] -translate-x-1/2';
-              width = 'w-[28%]';
+              position = 'left-[17%] -translate-x-1/2';
+              width = 'w-[25%]';
               zIndex = 'z-10';
               opacity = 'opacity-50';
-              scale = 'scale-85';
+              scale = 'scale-[0.85]';
             }
           }
 
