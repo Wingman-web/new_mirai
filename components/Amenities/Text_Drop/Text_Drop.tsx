@@ -1,10 +1,13 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useLayoutEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-gsap.registerPlugin(ScrollTrigger);
+// Register plugin outside component to avoid re-registration
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 const textDropLines = [
   { text: 'Indulgence', image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80' },
@@ -13,43 +16,70 @@ const textDropLines = [
   { text: 'Your Element', image: 'https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&q=80' },
 ];
 
+// Use useLayoutEffect on client, useEffect on server
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+
 export default function MiraiAmenitiesShowcase() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const textContainerRef = useRef<HTMLDivElement>(null);
   const textRefs = useRef<(HTMLDivElement | null)[]>([]);
   const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const section = sectionRef.current;
     const textContainer = textContainerRef.current;
     if (!section || !textContainer) return;
 
-    textRefs.current.forEach((textEl, idx) => {
-      if (!textEl) return;
-      if (idx === 0) {
-        gsap.set(textEl, { 
-          rotateX: 0,
-          opacity: 1,
-          transformOrigin: 'center top',
-        });
-      } else {
-        gsap.set(textEl, { 
-          rotateX: -90,
-          opacity: 0,
-          transformOrigin: 'center top',
-        });
+    // Clear any existing ScrollTriggers for this section
+    ScrollTrigger.getAll().forEach(st => {
+      if (st.trigger === section) {
+        st.kill();
       }
     });
 
-    gsap.set(imageRefs.current, { scale: 0.8, opacity: 0 });
-
+    // Create GSAP context for cleanup
     const ctx = gsap.context(() => {
+      // Set initial states immediately and explicitly
+      textRefs.current.forEach((textEl, idx) => {
+        if (!textEl) return;
+        
+        // Kill any existing tweens on this element
+        gsap.killTweensOf(textEl);
+        
+        if (idx === 0) {
+          gsap.set(textEl, { 
+            rotateX: 0,
+            opacity: 1,
+            transformOrigin: 'center top',
+            clearProps: 'none' // Don't clear the props we just set
+          });
+        } else {
+          gsap.set(textEl, { 
+            rotateX: -90,
+            opacity: 0,
+            transformOrigin: 'center top',
+            clearProps: 'none'
+          });
+        }
+      });
+
+      imageRefs.current.forEach((imgEl) => {
+        if (!imgEl) return;
+        gsap.killTweensOf(imgEl);
+        gsap.set(imgEl, { scale: 0.8, opacity: 0 });
+      });
+
+      // Force a refresh to ensure proper calculation
+      ScrollTrigger.refresh();
+
+      // Text animation timeline
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: section,
           start: 'top 60%',
           end: 'bottom 40%',
           scrub: 1,
+          invalidateOnRefresh: true, // Recalculate on refresh
         },
       });
 
@@ -68,12 +98,14 @@ export default function MiraiAmenitiesShowcase() {
         );
       });
 
+      // Images animation timeline
       const tlImages = gsap.timeline({
         scrollTrigger: {
           trigger: section,
           start: 'top 70%',
           end: 'center center',
           scrub: 1,
+          invalidateOnRefresh: true,
         },
       });
 
@@ -93,7 +125,15 @@ export default function MiraiAmenitiesShowcase() {
 
     }, section);
 
-    return () => ctx.revert();
+    // Refresh ScrollTrigger after a short delay to ensure DOM is ready
+    const refreshTimeout = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 100);
+
+    return () => {
+      clearTimeout(refreshTimeout);
+      ctx.revert();
+    };
   }, []);
 
   return (
@@ -107,7 +147,8 @@ export default function MiraiAmenitiesShowcase() {
         {/* Top Left Image - At corner */}
         <div
           ref={(el) => { imageRefs.current[0] = el; }}
-          className="absolute top-4 left-4 md:top-6 md:left-6 lg:top-8 lg:left-8 w-[180px] h-[220px] sm:w-[220px] sm:h-[280px] lg:w-[280px] lg:h-[350px] rounded-lg overflow-hidden shadow-xl will-change-transform"
+          className="absolute top-4 left-4 md:top-6 md:left-6 lg:top-8 lg:left-8 w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
+          style={{ opacity: 0, transform: 'scale(0.8)' }} // CSS initial state as fallback
         >
           <img
             src={textDropLines[0].image}
@@ -116,10 +157,11 @@ export default function MiraiAmenitiesShowcase() {
           />
         </div>
 
-        {/* Center Image - Behind text, moved left */}
+        {/* Center Image - Behind text, moved slightly right */}
         <div
           ref={(el) => { imageRefs.current[1] = el; }}
-          className="absolute top-[20%] left-[40%] -translate-x-1/2 w-[180px] h-[220px] sm:w-[220px] sm:h-[280px] lg:w-[280px] lg:h-[350px] rounded-lg overflow-hidden shadow-xl will-change-transform"
+          className="absolute top-[20%] left-[50%] -translate-x-1/2 w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
+          style={{ opacity: 0, transform: 'scale(0.8)' }}
         >
           <img
             src={textDropLines[1].image}
@@ -128,10 +170,11 @@ export default function MiraiAmenitiesShowcase() {
           />
         </div>
 
-        {/* Bottom Left Image */}
+        {/* Third Image - Bottom Right Corner (moved slightly right) */}
         <div
           ref={(el) => { imageRefs.current[2] = el; }}
-          className="absolute bottom-56 left-[15%] w-[180px] h-[220px] sm:w-[220px] sm:h-[280px] lg:w-[280px] lg:h-[350px] rounded-lg overflow-hidden shadow-xl will-change-transform"
+          className="absolute bottom-4 right-[10%] md:bottom-6 md:right-[10%] lg:bottom-8 lg:right-[10%] w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
+          style={{ opacity: 0, transform: 'scale(0.8)' }}
         >
           <img
             src={textDropLines[2].image}
@@ -140,10 +183,11 @@ export default function MiraiAmenitiesShowcase() {
           />
         </div>
 
-        {/* Bottom Right Image */}
+        {/* Fourth Image - Bottom Left Corner (moved slightly left) */}
         <div
           ref={(el) => { imageRefs.current[3] = el; }}
-          className="absolute bottom-40 right-[15%] w-[180px] h-[220px] sm:w-[220px] sm:h-[280px] lg:w-[280px] lg:h-[350px] rounded-lg overflow-hidden shadow-xl will-change-transform"
+          className="absolute bottom-4 left-[10%] md:bottom-6 md:left-[10%] lg:bottom-8 lg:left-[10%] w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
+          style={{ opacity: 0, transform: 'scale(0.8)' }}
         >
           <img
             src={textDropLines[3].image}
@@ -167,10 +211,13 @@ export default function MiraiAmenitiesShowcase() {
             style={{ 
               transformStyle: 'preserve-3d',
               transformOrigin: 'center top',
+              // CSS initial states as fallback before JS runs
+              opacity: idx === 0 ? 1 : 0,
+              transform: idx === 0 ? 'rotateX(0deg)' : 'rotateX(-90deg)',
             }}
           >
             <div
-              className="text-[clamp(2.5rem,8vw,6rem)] font-light tracking-[-0.02em] text-[#6B2C3E] leading-[1.1] text-center whitespace-nowrap"
+              className="text-[clamp(3.5rem,10vw,8rem)] font-light tracking-[-0.02em] text-[#6B2C3E] leading-[1.1] text-center whitespace-nowrap"
               style={{
                 fontFamily: '"Playfair Display", Georgia, serif',
               }}
