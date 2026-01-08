@@ -17,7 +17,6 @@ export default function MiraiAmenitiesShowcase() {
   const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
-    // Register GSAP plugin
     gsap.registerPlugin(ScrollTrigger);
 
     const section = sectionRef.current;
@@ -48,10 +47,13 @@ export default function MiraiAmenitiesShowcase() {
         });
       });
 
-      // Text animation - uses toggleActions instead of scrub
-      // This plays the animation when entering, and resets when leaving (scrolling back up)
+      // Text animation timeline
       const textTl = gsap.timeline({
-        paused: true, // Start paused
+        scrollTrigger: {
+          trigger: section,
+          start: 'top 60%', // Animation starts when top of section reaches 60% from top of viewport
+          toggleActions: 'play none none reverse', // play on enter, reverse on leave back
+        },
       });
 
       textRefs.current.forEach((textEl, idx) => {
@@ -70,7 +72,11 @@ export default function MiraiAmenitiesShowcase() {
 
       // Image animation timeline
       const imageTl = gsap.timeline({
-        paused: true,
+        scrollTrigger: {
+          trigger: section,
+          start: 'top 70%', // Images start slightly earlier
+          toggleActions: 'play none none reverse',
+        },
       });
 
       imageRefs.current.forEach((imgEl, idx) => {
@@ -87,45 +93,9 @@ export default function MiraiAmenitiesShowcase() {
         );
       });
 
-      // Create ScrollTrigger that plays/reverses the animation
-      ScrollTrigger.create({
-        trigger: section,
-        start: 'top 80%', // Starts when top of section hits 80% of viewport
-        end: 'bottom 20%',
-        // play on enter, reverse on leave back, play on enter back, reverse on leave
-        toggleActions: 'play reverse play reverse',
-        onEnter: () => {
-          textTl.play();
-          imageTl.play();
-        },
-        onLeaveBack: () => {
-          textTl.reverse();
-          imageTl.reverse();
-        },
-        onEnterBack: () => {
-          textTl.play();
-          imageTl.play();
-        },
-        onLeave: () => {
-          // Optional: keep animation complete when scrolling past
-        },
-      });
-
-      // If section is already in view on load, play animation immediately
-      const rect = section.getBoundingClientRect();
-      const isInView = rect.top < window.innerHeight * 0.8;
-      
-      if (isInView) {
-        // Small delay to ensure everything is ready
-        gsap.delayedCall(0.1, () => {
-          textTl.play();
-          imageTl.play();
-        });
-      }
-
     }, section);
 
-    // Refresh ScrollTrigger after a short delay
+    // Refresh ScrollTrigger after setup
     const refreshTimer = setTimeout(() => {
       ScrollTrigger.refresh();
     }, 100);
