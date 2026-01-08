@@ -6,9 +6,10 @@ interface AnimatedElementProps {
   delay?: number;
   children: React.ReactNode;
   className?: string;
+  style?: React.CSSProperties;
 }
 
-const AnimatedElement: React.FC<AnimatedElementProps> = ({ delay = 0, children, className = '' }) => {
+const AnimatedElement: React.FC<AnimatedElementProps> = ({ delay = 0, children, className = '', style }) => {
   const [isVisible, setIsVisible] = useState(false);
   const elementRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -48,6 +49,7 @@ const AnimatedElement: React.FC<AnimatedElementProps> = ({ delay = 0, children, 
           ? 'opacity-100 translate-y-0 scale-100' 
           : 'opacity-0 translate-y-8 scale-[0.99]'
       } ${className}`}
+      style={style}
     >
       {children}
     </div>
