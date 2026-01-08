@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 
 const textDropLines = [
   { text: 'Indulgence', image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80' },
@@ -11,7 +11,28 @@ const textDropLines = [
 
 export default function MiraiAmenitiesShowcase() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const [smoothProgress, setSmoothProgress] = useState(0);
+  const targetProgress = useRef(0);
+  const currentProgress = useRef(0);
+  const rafId = useRef<number | null>(null);
+
+  const lerp = (start: number, end: number, factor: number) => {
+    return start + (end - start) * factor;
+  };
+
+  const animate = useCallback(() => {
+    // Even slower interpolation for ultra smooth feel
+    const smoothFactor = 0.04;
+    
+    currentProgress.current = lerp(currentProgress.current, targetProgress.current, smoothFactor);
+    setSmoothProgress(currentProgress.current);
+    
+    if (Math.abs(currentProgress.current - targetProgress.current) > 0.0001) {
+      rafId.current = requestAnimationFrame(animate);
+    } else {
+      rafId.current = null;
+    }
+  }, []);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -21,63 +42,74 @@ export default function MiraiAmenitiesShowcase() {
       const rect = section.getBoundingClientRect();
       const windowHeight = window.innerHeight;
       
-      // Start when section top reaches 30% from top of viewport (section is well visible)
-      // End when section top reaches -10% (slightly above viewport)
+      // Extended scroll range for slower animation
+      // Start when section top reaches 30% from top
+      // End when section top is 50% above viewport (more scroll needed)
       const startPoint = windowHeight * 0.30;
-      const endPoint = windowHeight * -0.10;
+      const endPoint = windowHeight * -0.50;
       
-      // Calculate progress (0 to 1)
       const totalDistance = startPoint - endPoint;
       const currentPosition = startPoint - rect.top;
       
       let progress = currentPosition / totalDistance;
-      progress = Math.max(0, Math.min(1, progress)); // Clamp between 0 and 1
+      progress = Math.max(0, Math.min(1, progress));
       
-      setScrollProgress(progress);
+      targetProgress.current = progress;
+      
+      if (rafId.current === null) {
+        rafId.current = requestAnimationFrame(animate);
+      }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // Initial check
+    handleScroll();
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      if (rafId.current !== null) {
+        cancelAnimationFrame(rafId.current);
+      }
     };
-  }, []);
+  }, [animate]);
 
-  // Calculate individual element progress with stagger
+  // Slower, more gradual text progression
   const getTextProgress = (index: number) => {
-    if (index === 0) return 1; // First line always visible
+    if (index === 0) return 1;
     
-    // Stagger each line - each starts after the previous is partially done
-    const staggerDelay = 0.15; // 15% delay between each line
-    const lineDuration = 0.4; // Each line takes 40% of total scroll to complete
+    // More spread out timing - each line takes longer
+    const staggerOffset = 0.25; // 25% offset between each line
+    const animationDuration = 0.50; // Each line takes 50% of scroll
     
-    const lineStart = (index - 1) * staggerDelay;
-    const lineEnd = lineStart + lineDuration;
+    const lineStart = (index - 1) * staggerOffset;
+    const lineEnd = lineStart + animationDuration;
     
-    const lineProgress = (scrollProgress - lineStart) / (lineEnd - lineStart);
-    return Math.max(0, Math.min(1, lineProgress));
+    if (smoothProgress <= lineStart) return 0;
+    if (smoothProgress >= lineEnd) return 1;
+    
+    return (smoothProgress - lineStart) / animationDuration;
   };
 
   const getImageProgress = (index: number) => {
-    const staggerDelay = 0.1;
-    const imageDuration = 0.5;
+    const staggerOffset = 0.18;
+    const animationDuration = 0.55;
     
-    const imageStart = index * staggerDelay;
-    const imageEnd = imageStart + imageDuration;
+    const imageStart = index * staggerOffset;
+    const imageEnd = imageStart + animationDuration;
     
-    const imageProgress = (scrollProgress - imageStart) / (imageEnd - imageStart);
-    return Math.max(0, Math.min(1, imageProgress));
+    if (smoothProgress <= imageStart) return 0;
+    if (smoothProgress >= imageEnd) return 1;
+    
+    return (smoothProgress - imageStart) / animationDuration;
   };
 
-  // Easing function for smoother animation
-  const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+  // Ultra smooth easing - slower at the end
+  const easeOutSine = (t: number) => Math.sin((t * Math.PI) / 2);
 
   return (
     <section
       ref={sectionRef}
       className="relative min-h-screen pb-48 md:pb-64 lg:pb-80 bg-white overflow-hidden"
-      style={{ perspective: '1000px' }}
+      style={{ perspective: '1200px' }}
     >
       {/* Background Images */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -85,8 +117,8 @@ export default function MiraiAmenitiesShowcase() {
         <div
           className="absolute top-4 left-4 md:top-6 md:left-6 lg:top-8 lg:left-8 w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
           style={{
-            opacity: easeOutCubic(getImageProgress(0)) * 0.8,
-            transform: `scale(${0.8 + easeOutCubic(getImageProgress(0)) * 0.2})`,
+            opacity: easeOutSine(getImageProgress(0)) * 0.8,
+            transform: `scale(${0.8 + easeOutSine(getImageProgress(0)) * 0.2})`,
           }}
         >
           <img src={textDropLines[0].image} alt={textDropLines[0].text} className="w-full h-full object-cover" />
@@ -96,8 +128,8 @@ export default function MiraiAmenitiesShowcase() {
         <div
           className="absolute top-[20%] left-[50%] w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
           style={{
-            opacity: easeOutCubic(getImageProgress(1)) * 0.8,
-            transform: `translateX(-50%) scale(${0.8 + easeOutCubic(getImageProgress(1)) * 0.2})`,
+            opacity: easeOutSine(getImageProgress(1)) * 0.8,
+            transform: `translateX(-50%) scale(${0.8 + easeOutSine(getImageProgress(1)) * 0.2})`,
           }}
         >
           <img src={textDropLines[1].image} alt={textDropLines[1].text} className="w-full h-full object-cover" />
@@ -107,8 +139,8 @@ export default function MiraiAmenitiesShowcase() {
         <div
           className="absolute bottom-4 right-[10%] md:bottom-6 md:right-[10%] lg:bottom-8 lg:right-[10%] w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
           style={{
-            opacity: easeOutCubic(getImageProgress(2)) * 0.8,
-            transform: `scale(${0.8 + easeOutCubic(getImageProgress(2)) * 0.2})`,
+            opacity: easeOutSine(getImageProgress(2)) * 0.8,
+            transform: `scale(${0.8 + easeOutSine(getImageProgress(2)) * 0.2})`,
           }}
         >
           <img src={textDropLines[2].image} alt={textDropLines[2].text} className="w-full h-full object-cover" />
@@ -118,8 +150,8 @@ export default function MiraiAmenitiesShowcase() {
         <div
           className="absolute bottom-4 left-[10%] md:bottom-6 md:left-[10%] lg:bottom-8 lg:left-[10%] w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
           style={{
-            opacity: easeOutCubic(getImageProgress(3)) * 0.8,
-            transform: `scale(${0.8 + easeOutCubic(getImageProgress(3)) * 0.2})`,
+            opacity: easeOutSine(getImageProgress(3)) * 0.8,
+            transform: `scale(${0.8 + easeOutSine(getImageProgress(3)) * 0.2})`,
           }}
         >
           <img src={textDropLines[3].image} alt={textDropLines[3].text} className="w-full h-full object-cover" />
@@ -129,11 +161,11 @@ export default function MiraiAmenitiesShowcase() {
       {/* Big Text */}
       <div 
         className="relative z-10 flex flex-col items-center pt-4 md:pt-6 lg:pt-8 gap-6 md:gap-10 lg:gap-14"
-        style={{ perspective: '1000px' }}
+        style={{ perspective: '1200px' }}
       >
         {textDropLines.map((item, idx) => {
           const progress = getTextProgress(idx);
-          const easedProgress = easeOutCubic(progress);
+          const easedProgress = easeOutSine(progress);
           
           return (
             <div 
@@ -146,6 +178,7 @@ export default function MiraiAmenitiesShowcase() {
                 transform: idx === 0 
                   ? 'rotateX(0deg)' 
                   : `rotateX(${-90 + easedProgress * 90}deg)`,
+                backfaceVisibility: 'hidden',
               }}
             >
               <div
