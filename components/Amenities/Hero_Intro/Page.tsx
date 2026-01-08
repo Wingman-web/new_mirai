@@ -76,7 +76,7 @@ export default function MiraiAmenities() {
             </h2>
           </AnimatedElement>
 
-          <AnimatedElement delay={150} className="max-w-4xl mx-auto" style={{ marginTop: '30px' }}>
+          <AnimatedElement delay={150} className="w-full mx-auto" style={{ marginTop: '30px' }}>
             <p style={{ 
               fontSize: '20px',
               lineHeight: '1.4',
