@@ -21,10 +21,10 @@ export default function MiraiAmenitiesShowcase() {
       const rect = section.getBoundingClientRect();
       const windowHeight = window.innerHeight;
       
-      // Start when section top reaches 30% from top of viewport (section is well visible)
-      // End when section top reaches -10% (slightly above viewport)
+      // Start when section top reaches 30% from top of viewport
+      // End when section top reaches -30% (more scroll distance = slower animation)
       const startPoint = windowHeight * 0.30;
-      const endPoint = windowHeight * -0.10;
+      const endPoint = windowHeight * -0.30;
       
       // Calculate progress (0 to 1)
       const totalDistance = startPoint - endPoint;
@@ -48,9 +48,9 @@ export default function MiraiAmenitiesShowcase() {
   const getTextProgress = (index: number) => {
     if (index === 0) return 1; // First line always visible
     
-    // Stagger each line - each starts after the previous is partially done
-    const staggerDelay = 0.15; // 15% delay between each line
-    const lineDuration = 0.4; // Each line takes 40% of total scroll to complete
+    // Slower stagger - more delay between each line
+    const staggerDelay = 0.20; // 20% delay between each line (was 15%)
+    const lineDuration = 0.50; // Each line takes 50% of total scroll (was 40%)
     
     const lineStart = (index - 1) * staggerDelay;
     const lineEnd = lineStart + lineDuration;
@@ -60,8 +60,8 @@ export default function MiraiAmenitiesShowcase() {
   };
 
   const getImageProgress = (index: number) => {
-    const staggerDelay = 0.1;
-    const imageDuration = 0.5;
+    const staggerDelay = 0.12;
+    const imageDuration = 0.6;
     
     const imageStart = index * staggerDelay;
     const imageEnd = imageStart + imageDuration;
@@ -70,8 +70,11 @@ export default function MiraiAmenitiesShowcase() {
     return Math.max(0, Math.min(1, imageProgress));
   };
 
-  // Easing function for smoother animation
-  const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+  // Smoother easing function - ease out quart for more gradual deceleration
+  const easeOutQuart = (t: number) => 1 - Math.pow(1 - t, 4);
+  
+  // Even smoother easing for text
+  const easeOutQuint = (t: number) => 1 - Math.pow(1 - t, 5);
 
   return (
     <section
@@ -85,8 +88,8 @@ export default function MiraiAmenitiesShowcase() {
         <div
           className="absolute top-4 left-4 md:top-6 md:left-6 lg:top-8 lg:left-8 w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
           style={{
-            opacity: easeOutCubic(getImageProgress(0)) * 0.8,
-            transform: `scale(${0.8 + easeOutCubic(getImageProgress(0)) * 0.2})`,
+            opacity: easeOutQuart(getImageProgress(0)) * 0.8,
+            transform: `scale(${0.8 + easeOutQuart(getImageProgress(0)) * 0.2})`,
           }}
         >
           <img src={textDropLines[0].image} alt={textDropLines[0].text} className="w-full h-full object-cover" />
@@ -96,8 +99,8 @@ export default function MiraiAmenitiesShowcase() {
         <div
           className="absolute top-[20%] left-[50%] w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
           style={{
-            opacity: easeOutCubic(getImageProgress(1)) * 0.8,
-            transform: `translateX(-50%) scale(${0.8 + easeOutCubic(getImageProgress(1)) * 0.2})`,
+            opacity: easeOutQuart(getImageProgress(1)) * 0.8,
+            transform: `translateX(-50%) scale(${0.8 + easeOutQuart(getImageProgress(1)) * 0.2})`,
           }}
         >
           <img src={textDropLines[1].image} alt={textDropLines[1].text} className="w-full h-full object-cover" />
@@ -107,8 +110,8 @@ export default function MiraiAmenitiesShowcase() {
         <div
           className="absolute bottom-4 right-[10%] md:bottom-6 md:right-[10%] lg:bottom-8 lg:right-[10%] w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
           style={{
-            opacity: easeOutCubic(getImageProgress(2)) * 0.8,
-            transform: `scale(${0.8 + easeOutCubic(getImageProgress(2)) * 0.2})`,
+            opacity: easeOutQuart(getImageProgress(2)) * 0.8,
+            transform: `scale(${0.8 + easeOutQuart(getImageProgress(2)) * 0.2})`,
           }}
         >
           <img src={textDropLines[2].image} alt={textDropLines[2].text} className="w-full h-full object-cover" />
@@ -118,8 +121,8 @@ export default function MiraiAmenitiesShowcase() {
         <div
           className="absolute bottom-4 left-[10%] md:bottom-6 md:left-[10%] lg:bottom-8 lg:left-[10%] w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
           style={{
-            opacity: easeOutCubic(getImageProgress(3)) * 0.8,
-            transform: `scale(${0.8 + easeOutCubic(getImageProgress(3)) * 0.2})`,
+            opacity: easeOutQuart(getImageProgress(3)) * 0.8,
+            transform: `scale(${0.8 + easeOutQuart(getImageProgress(3)) * 0.2})`,
           }}
         >
           <img src={textDropLines[3].image} alt={textDropLines[3].text} className="w-full h-full object-cover" />
@@ -133,7 +136,7 @@ export default function MiraiAmenitiesShowcase() {
       >
         {textDropLines.map((item, idx) => {
           const progress = getTextProgress(idx);
-          const easedProgress = easeOutCubic(progress);
+          const easedProgress = easeOutQuint(progress);
           
           return (
             <div 
