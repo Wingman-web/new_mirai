@@ -68,7 +68,8 @@ export default function MiraiAmenities() {
     fontSize: '48px',
     fontWeight: 500,
     fontFamily: 'Migra, serif',
-    color: '#78252f'
+    color: '#78252f',
+    WebkitTextStroke: '0.5px #78252f'
   };
 
   return (
