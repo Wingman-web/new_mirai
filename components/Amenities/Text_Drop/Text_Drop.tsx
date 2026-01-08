@@ -22,37 +22,41 @@ export default function MiraiAmenitiesShowcase() {
     const section = sectionRef.current;
     if (!section) return;
 
-    // Kill any existing ScrollTriggers for clean slate
+    // Kill any existing ScrollTriggers
     ScrollTrigger.getAll().forEach(st => st.kill());
 
     const ctx = gsap.context(() => {
       // Set initial states for text elements
       textRefs.current.forEach((textEl, idx) => {
         if (!textEl) return;
-        gsap.set(textEl, {
-          rotateX: idx === 0 ? 0 : -90,
-          opacity: idx === 0 ? 1 : 0,
-          transformOrigin: 'center top',
-          force3D: true,
-        });
+        if (idx === 0) {
+          gsap.set(textEl, {
+            rotateX: 0,
+            opacity: 1,
+            transformOrigin: 'center top',
+          });
+        } else {
+          gsap.set(textEl, {
+            rotateX: -90,
+            opacity: 0,
+            transformOrigin: 'center top',
+          });
+        }
       });
 
       // Set initial states for image elements
       imageRefs.current.forEach((imgEl) => {
         if (!imgEl) return;
-        gsap.set(imgEl, { 
-          scale: 0.8, 
-          opacity: 0,
-          force3D: true,
-        });
+        gsap.set(imgEl, { scale: 0.8, opacity: 0 });
       });
 
       // Text animation timeline
       const textTl = gsap.timeline({
         scrollTrigger: {
           trigger: section,
-          start: 'top 60%', // Animation starts when top of section reaches 60% from top of viewport
-          toggleActions: 'play none none reverse', // play on enter, reverse on leave back
+          start: 'top 60%',
+          // markers: true, // Uncomment to debug trigger points
+          toggleActions: 'play none none reverse',
         },
       });
 
@@ -74,7 +78,7 @@ export default function MiraiAmenitiesShowcase() {
       const imageTl = gsap.timeline({
         scrollTrigger: {
           trigger: section,
-          start: 'top 70%', // Images start slightly earlier
+          start: 'top 70%',
           toggleActions: 'play none none reverse',
         },
       });
@@ -95,7 +99,7 @@ export default function MiraiAmenitiesShowcase() {
 
     }, section);
 
-    // Refresh ScrollTrigger after setup
+    // Refresh after a delay
     const refreshTimer = setTimeout(() => {
       ScrollTrigger.refresh();
     }, 100);
@@ -117,7 +121,6 @@ export default function MiraiAmenitiesShowcase() {
         <div
           ref={(el) => { imageRefs.current[0] = el; }}
           className="absolute top-4 left-4 md:top-6 md:left-6 lg:top-8 lg:left-8 w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
-          style={{ opacity: 0, transform: 'scale(0.8)' }}
         >
           <img src={textDropLines[0].image} alt={textDropLines[0].text} className="w-full h-full object-cover" />
         </div>
@@ -125,7 +128,6 @@ export default function MiraiAmenitiesShowcase() {
         <div
           ref={(el) => { imageRefs.current[1] = el; }}
           className="absolute top-[20%] left-[50%] -translate-x-1/2 w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
-          style={{ opacity: 0, transform: 'scale(0.8)' }}
         >
           <img src={textDropLines[1].image} alt={textDropLines[1].text} className="w-full h-full object-cover" />
         </div>
@@ -133,7 +135,6 @@ export default function MiraiAmenitiesShowcase() {
         <div
           ref={(el) => { imageRefs.current[2] = el; }}
           className="absolute bottom-4 right-[10%] md:bottom-6 md:right-[10%] lg:bottom-8 lg:right-[10%] w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
-          style={{ opacity: 0, transform: 'scale(0.8)' }}
         >
           <img src={textDropLines[2].image} alt={textDropLines[2].text} className="w-full h-full object-cover" />
         </div>
@@ -141,7 +142,6 @@ export default function MiraiAmenitiesShowcase() {
         <div
           ref={(el) => { imageRefs.current[3] = el; }}
           className="absolute bottom-4 left-[10%] md:bottom-6 md:left-[10%] lg:bottom-8 lg:left-[10%] w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
-          style={{ opacity: 0, transform: 'scale(0.8)' }}
         >
           <img src={textDropLines[3].image} alt={textDropLines[3].text} className="w-full h-full object-cover" />
         </div>
@@ -160,8 +160,6 @@ export default function MiraiAmenitiesShowcase() {
             style={{ 
               transformStyle: 'preserve-3d',
               transformOrigin: 'center top',
-              opacity: idx === 0 ? 1 : 0,
-              transform: idx === 0 ? 'rotateX(0deg)' : 'rotateX(-90deg)',
             }}
           >
             <div
