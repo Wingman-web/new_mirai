@@ -323,7 +323,7 @@ export default function AmenitiesCarousel() {
 
           {/* Tab Content */}
           <div className="w-full mx-auto mb-8">
-            <p className="text-lg leading-relaxed font-medium text-gray-700" style={{ paddingLeft: '0.5%', paddingRight: '0.5%', textAlign: 'justify' }}>
+            <p className="text-lg leading-relaxed font-medium text-gray-700" style={{ paddingLeft: '13%', paddingRight: '13%', textAlign: 'justify' }}>
               {tabsData[activeTab].description}
             </p>
           </div>
