@@ -67,9 +67,10 @@ export default function MiraiAmenities() {
                 fontFamily: 'Georgia, serif',
                 fontSize: '4rem',
                 lineHeight: '1.1',
-                fontWeight: 400,
+                fontWeight: 300,
                 color: '#78252f',
-                marginBottom: '2rem'
+                marginBottom: '2rem',
+                letterSpacing: '-0.02em'
               }}
             >
               Limitless Indulgence<br />For the Limited Few
