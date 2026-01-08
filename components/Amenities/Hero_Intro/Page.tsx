@@ -2,7 +2,13 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 
-const AnimatedElement = ({ delay = 0, children, className = '' }) => {
+interface AnimatedElementProps {
+  delay?: number;
+  children: React.ReactNode;
+  className?: string;
+}
+
+const AnimatedElement: React.FC<AnimatedElementProps> = ({ delay = 0, children, className = '' }) => {
   const [isVisible, setIsVisible] = useState(false);
   const elementRef = useRef(null);
   const timeoutRef = useRef(null);
@@ -59,7 +65,7 @@ export default function MiraiAmenities() {
                 fontFamily: 'Georgia, serif',
                 fontSize: '4rem',
                 lineHeight: '1.1',
-                fontWeight: 500,
+                fontWeight: 400,
                 color: '#78252f',
                 marginBottom: '2rem'
               }}
