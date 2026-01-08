@@ -1,8 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useEffect, useRef, useState } from 'react';
 
 const textDropLines = [
   { text: 'Indulgence', image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80' },
@@ -13,100 +11,30 @@ const textDropLines = [
 
 export default function MiraiAmenitiesShowcase() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const textRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-
     const section = sectionRef.current;
     if (!section) return;
 
-    // Kill any existing ScrollTriggers
-    ScrollTrigger.getAll().forEach(st => st.kill());
-
-    const ctx = gsap.context(() => {
-      // Set initial states for text elements
-      textRefs.current.forEach((textEl, idx) => {
-        if (!textEl) return;
-        if (idx === 0) {
-          gsap.set(textEl, {
-            rotateX: 0,
-            opacity: 1,
-            transformOrigin: 'center top',
-          });
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
         } else {
-          gsap.set(textEl, {
-            rotateX: -90,
-            opacity: 0,
-            transformOrigin: 'center top',
-          });
+          setIsVisible(false);
         }
-      });
+      },
+      { 
+        rootMargin: '0px 0px -20% 0px', // Triggers when section is 20% into viewport
+        threshold: 0 
+      }
+    );
 
-      // Set initial states for image elements
-      imageRefs.current.forEach((imgEl) => {
-        if (!imgEl) return;
-        gsap.set(imgEl, { scale: 0.8, opacity: 0 });
-      });
-
-      // Text animation timeline
-      const textTl = gsap.timeline({
-        scrollTrigger: {
-          trigger: section,
-          start: 'top 60%',
-          // markers: true, // Uncomment to debug trigger points
-          toggleActions: 'play none none reverse',
-        },
-      });
-
-      textRefs.current.forEach((textEl, idx) => {
-        if (!textEl || idx === 0) return;
-        textTl.to(
-          textEl,
-          {
-            rotateX: 0,
-            opacity: 1,
-            duration: 0.8,
-            ease: 'power2.out',
-          },
-          (idx - 1) * 0.2
-        );
-      });
-
-      // Image animation timeline
-      const imageTl = gsap.timeline({
-        scrollTrigger: {
-          trigger: section,
-          start: 'top 70%',
-          toggleActions: 'play none none reverse',
-        },
-      });
-
-      imageRefs.current.forEach((imgEl, idx) => {
-        if (!imgEl) return;
-        imageTl.to(
-          imgEl,
-          {
-            scale: 1,
-            opacity: 0.8,
-            duration: 0.8,
-            ease: 'power2.out',
-          },
-          idx * 0.1
-        );
-      });
-
-    }, section);
-
-    // Refresh after a delay
-    const refreshTimer = setTimeout(() => {
-      ScrollTrigger.refresh();
-    }, 100);
+    observer.observe(section);
 
     return () => {
-      clearTimeout(refreshTimer);
-      ctx.revert();
+      observer.disconnect();
     };
   }, []);
 
@@ -118,30 +46,50 @@ export default function MiraiAmenitiesShowcase() {
     >
       {/* Background Images */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        {/* Top Left Image */}
         <div
-          ref={(el) => { imageRefs.current[0] = el; }}
-          className="absolute top-4 left-4 md:top-6 md:left-6 lg:top-8 lg:left-8 w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
+          className="absolute top-4 left-4 md:top-6 md:left-6 lg:top-8 lg:left-8 w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl transition-all duration-700 ease-out"
+          style={{
+            opacity: isVisible ? 0.8 : 0,
+            transform: isVisible ? 'scale(1)' : 'scale(0.8)',
+            transitionDelay: '0ms',
+          }}
         >
           <img src={textDropLines[0].image} alt={textDropLines[0].text} className="w-full h-full object-cover" />
         </div>
 
+        {/* Center Image */}
         <div
-          ref={(el) => { imageRefs.current[1] = el; }}
-          className="absolute top-[20%] left-[50%] -translate-x-1/2 w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
+          className="absolute top-[20%] left-[50%] -translate-x-1/2 w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl transition-all duration-700 ease-out"
+          style={{
+            opacity: isVisible ? 0.8 : 0,
+            transform: isVisible ? 'scale(1) translateX(-50%)' : 'scale(0.8) translateX(-50%)',
+            transitionDelay: '100ms',
+          }}
         >
           <img src={textDropLines[1].image} alt={textDropLines[1].text} className="w-full h-full object-cover" />
         </div>
 
+        {/* Bottom Right Image */}
         <div
-          ref={(el) => { imageRefs.current[2] = el; }}
-          className="absolute bottom-4 right-[10%] md:bottom-6 md:right-[10%] lg:bottom-8 lg:right-[10%] w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
+          className="absolute bottom-4 right-[10%] md:bottom-6 md:right-[10%] lg:bottom-8 lg:right-[10%] w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl transition-all duration-700 ease-out"
+          style={{
+            opacity: isVisible ? 0.8 : 0,
+            transform: isVisible ? 'scale(1)' : 'scale(0.8)',
+            transitionDelay: '200ms',
+          }}
         >
           <img src={textDropLines[2].image} alt={textDropLines[2].text} className="w-full h-full object-cover" />
         </div>
 
+        {/* Bottom Left Image */}
         <div
-          ref={(el) => { imageRefs.current[3] = el; }}
-          className="absolute bottom-4 left-[10%] md:bottom-6 md:left-[10%] lg:bottom-8 lg:left-[10%] w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl will-change-transform"
+          className="absolute bottom-4 left-[10%] md:bottom-6 md:left-[10%] lg:bottom-8 lg:left-[10%] w-[220px] h-[280px] sm:w-[280px] sm:h-[350px] lg:w-[350px] lg:h-[440px] rounded-lg overflow-hidden shadow-xl transition-all duration-700 ease-out"
+          style={{
+            opacity: isVisible ? 0.8 : 0,
+            transform: isVisible ? 'scale(1)' : 'scale(0.8)',
+            transitionDelay: '300ms',
+          }}
         >
           <img src={textDropLines[3].image} alt={textDropLines[3].text} className="w-full h-full object-cover" />
         </div>
@@ -155,11 +103,13 @@ export default function MiraiAmenitiesShowcase() {
         {textDropLines.map((item, idx) => (
           <div 
             key={idx}
-            ref={(el) => { textRefs.current[idx] = el; }}
-            className="will-change-transform"
+            className="transition-all duration-700 ease-out"
             style={{ 
               transformStyle: 'preserve-3d',
               transformOrigin: 'center top',
+              opacity: idx === 0 ? 1 : (isVisible ? 1 : 0),
+              transform: idx === 0 ? 'rotateX(0deg)' : (isVisible ? 'rotateX(0deg)' : 'rotateX(-90deg)'),
+              transitionDelay: idx === 0 ? '0ms' : `${(idx - 1) * 150}ms`,
             }}
           >
             <div
