@@ -122,7 +122,7 @@ const EraSeasons: React.FC = () => {
   ]);
 
   const backgroundImages: { [key: string]: string } = {
-    'bg-spring': 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/aqua.png',
+    'bg-spring': 'https://azure-baboon-302476.hostingersite.com/mirai_latest/media/pods/infinitypool.png',
     'bg-summer': 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/avia.jpg',
     'bg-autumn': 'https://azure-baboon-302476.hostingersite.com/mirai_latest/media/pods/terrakidsplay.png',
     'bg-winter': 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/pyro.png',
