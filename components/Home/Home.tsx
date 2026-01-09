@@ -1,7 +1,7 @@
-'use client'; // Add this at the top if using App Router
+'use client';
 
-import React from 'react'
-import VideoPreloader from './Preloader/Preloader' // Import the preloader
+import React, { useEffect, useState } from 'react'
+import VideoPreloader from './Preloader/Preloader'
 import Hero from './Hero/Hero'
 import { RevealZoom } from './Gateway/Gateway' 
 import Mirai_Grace from './Mirai_Grace/Mirai_Grace'
@@ -15,12 +15,48 @@ import Footer from './Footer/Footer'
 import SixthElement from './Sixth_Element/Sixth_element'
 
 const Home = () => {
+  const [isPreloaderComplete, setIsPreloaderComplete] = useState(false);
+
+  useEffect(() => {
+    // Check if preloader was already shown
+    const hasSeenPreloader = sessionStorage.getItem('preloaderShown');
+    
+    if (hasSeenPreloader) {
+      setIsPreloaderComplete(true);
+    } else {
+      // Disable scrolling during preloader
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+    }
+
+    return () => {
+      // Cleanup: re-enable scrolling when component unmounts
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
+  }, []);
+
+  const handlePreloaderComplete = () => {
+    setIsPreloaderComplete(true);
+    // Re-enable scrolling immediately after preloader ends
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
+  };
+
   return (
     <>
       {/* Video Preloader - highest z-index */}
-      <VideoPreloader />
+      <VideoPreloader onComplete={handlePreloaderComplete} />
       
-      <div className="relative bg-black w-full overflow-x-hidden">
+      <div 
+        className="relative bg-black w-full overflow-x-hidden"
+        style={{
+          // Ensure content is visible and scrollable after preloader
+          minHeight: '100vh',
+          opacity: isPreloaderComplete ? 1 : 0,
+          transition: 'opacity 0.3s ease-in'
+        }}
+      >
         <div className="relative z-10 bg-black">
           <Hero />
           
