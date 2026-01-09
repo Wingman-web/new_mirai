@@ -10,6 +10,7 @@ export default function ContactForm() {
   const [bgError, setBgError] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     // Load Migra font from Fontshare
@@ -26,10 +27,16 @@ export default function ContactForm() {
     };
     img.src = dayViewPath;
 
+    // Mark as mounted after a short delay to prevent initial flash
+    const mountTimer = setTimeout(() => {
+      setIsMounted(true);
+    }, 100);
+
     return () => {
       img.onload = null;
       img.onerror = null;
       document.head.removeChild(link);
+      clearTimeout(mountTimer);
     };
   }, []);
 
@@ -49,9 +56,12 @@ export default function ContactForm() {
           // Calculate how far from the bottom we are
           const distanceFromBottom = scrollHeight - (scrollY + windowHeight);
           
-          // Show contact form when near the bottom (within 1 viewport height)
-          // Adjust this threshold as needed
-          const shouldShow = distanceFromBottom < windowHeight;
+          // Only show contact form when very close to bottom (within 1 viewport height)
+          // AND user has scrolled past the initial view
+          const hasScrolledPastStart = scrollY > windowHeight;
+          const isNearBottom = distanceFromBottom < windowHeight;
+          
+          const shouldShow = hasScrolledPastStart && isNearBottom;
           
           setIsVisible(shouldShow);
           ticking = false;
@@ -61,10 +71,23 @@ export default function ContactForm() {
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // Check initial state
+    
+    // Initial check - but ensure it starts hidden
+    // Small delay to ensure scroll position is accurate after page load
+    const initialCheckTimer = setTimeout(() => {
+      handleScroll();
+    }, 500);
 
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(initialCheckTimer);
+    };
   }, []);
+
+  // Don't render anything until mounted (prevents flash)
+  if (!isMounted) {
+    return null;
+  }
 
   const sectionStyle: React.CSSProperties = {
     zIndex: 1,
