@@ -27,7 +27,7 @@ export const defaultHotspots: HotspotData[] = [
   { id: 'hp-amazon', pitch: -2, yaw: 35, title: 'Amazon Hyderabad Campus', distance: '5 Mins', icon: 'tech' },
   { id: 'hp-waverock', pitch: -2, yaw: 65, title: 'WaveRock SEZ', distance: '5 Mins', icon: 'tech' },
   { id: 'hp-shriram', pitch: -5, yaw: 315, title: 'Shriram Academy', distance: '10 Mins', icon: 'school' },
-  { id: 'hp-consulate', pitch: 0, yaw: 342, title: 'U.S. Consulate General', distance: '10 Mins', icon: 'government' },
+  { id: 'hp-consulate', pitch: -4, yaw: 342, title: 'U.S. Consulate General', distance: '10 Mins', icon: 'government' },
   { id: 'hp-neopolis', pitch: -3, yaw: 247, title: 'Neopolis', distance: '10 Mins', icon: 'shopping' },
   { id: 'hp-gandipet', pitch: -1, yaw: 220, title: 'Gandipet Lake', distance: '10 Mins', icon: 'lake' },
   { id: 'hp-wipro', pitch: -5, yaw: 380, title: 'Wipro Circle', distance: '10 Mins', icon: 'tech' },
