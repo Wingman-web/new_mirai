@@ -78,13 +78,13 @@ const EraSeasons: React.FC = () => {
       title: 'AVIA',
       description: '',
       amenities: [
-        { name: 'Amphitheatre with Advent Seating Zone', image: 'bg-avia-amphitheatre' },
-        { name: 'Sculpture Pod', image: 'bg-avia-sculpture' },
-        { name: 'Digital Presentation Room', image: 'bg-avia-digital' },
-        { name: 'Meeting Rooms', image: 'bg-avia-meeting' },
-        { name: 'Interactive Water Plaza', image: 'bg-avia-waterplaza' },
-        { name: 'Bar Counter', image: 'bg-avia-bar' },
-        { name: 'Vantage Point', image: 'bg-avia-vantage' }
+        { name: 'Amphitheatre with Advent Seating Zone', image: 'bg-avia-1' },  // 1
+        { name: 'Sculpture Pod', image: 'bg-avia-2' },                           // 2
+        { name: 'Digital Presentation Room', image: 'bg-avia-3' },               // 3
+        { name: 'Meeting Rooms', image: 'bg-avia-1' },                           // 1
+        { name: 'Interactive Water Plaza', image: 'bg-avia-2' },                 // 2
+        { name: 'Bar Counter', image: 'bg-avia-3' },                             // 3
+        { name: 'Vantage Point', image: 'bg-avia-1' }                            // 1
       ],
       bgClass: 'bg-spring'
     }
@@ -146,7 +146,11 @@ const EraSeasons: React.FC = () => {
     // Pyro images
     'bg-pyro-1': 'https://d3p1hokpi6aqc3.cloudfront.net/Pyro_Pod_1.png',
     'bg-pyro-2': 'https://d3p1hokpi6aqc3.cloudfront.net/Pyro_pod_2.png',
-    'bg-pyro-3': 'https://d3p1hokpi6aqc3.cloudfront.net/Pyro_Pod_3.png'
+    'bg-pyro-3': 'https://d3p1hokpi6aqc3.cloudfront.net/Pyro_Pod_3.png',
+    // Avia images
+    'bg-avia-1': 'https://d3p1hokpi6aqc3.cloudfront.net/Avia_%20Pod_1.png',
+    'bg-avia-2': 'https://d3p1hokpi6aqc3.cloudfront.net/Avia_Pod_2.png',
+    'bg-avia-3': 'https://d3p1hokpi6aqc3.cloudfront.net/Avia_%20Pod_3.png'
   };
 
   const getBackgroundImage = (bgClass: string): string => {
