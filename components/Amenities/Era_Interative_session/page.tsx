@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 
 interface Amenity {
   name: string;
@@ -23,20 +23,49 @@ const EraSeasons: React.FC = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(true);
 
+  // Random images for Terra amenities
+  const terraRandomImages = [
+    'https://d3p1hokpi6aqc3.cloudfront.net/Avia_Pod_1.png',
+    'https://d3p1hokpi6aqc3.cloudfront.net/Aminites_Tera_Pods_3.png',
+    'https://d3p1hokpi6aqc3.cloudfront.net/Aminites_Tera_Pods_2.png'
+  ];
+
+  // Generate random image assignments for Terra amenities (memoized to stay consistent during session)
+  const terraImageAssignments = useMemo(() => {
+    const terraAmenityNames = [
+      'Outdoor Fitness Zones',
+      'Gathering Zones',
+      'Sandpit Area',
+      'Kids Play Area',
+      'Terrace Lawn',
+      'Ultra-Luxury Lounge',
+      'Biophilic Seating Arena',
+      'Vantage Point',
+      'Yoga Lawn'
+    ];
+    
+    const assignments: { [key: string]: string } = {};
+    terraAmenityNames.forEach((name) => {
+      const randomIndex = Math.floor(Math.random() * terraRandomImages.length);
+      assignments[name] = `terra-random-${randomIndex}`;
+    });
+    return assignments;
+  }, []);
+
   const seasons: Seasons = {
     spring: {
       title: 'TERRA',
       description: '',
       amenities: [
-        { name: 'Outdoor Fitness Zones', image: 'bg-aqua-fitness' },
-        { name: 'Gathering Zones', image: 'bg-aqua-gathering' },
-        { name: 'Sandpit Area', image: 'bg-aqua-sandpit' },
-        { name: 'Kids Play Area', image: 'bg-aqua-kids' },
-        { name: 'Terrace Lawn', image: 'bg-aqua-lawn' },
-        { name: 'Ultra-Luxury Lounge', image: 'bg-aqua-lounge' },
-        { name: 'Biophilic Seating Arena', image: 'bg-aqua-biophilic' },
-        { name: 'Vantage Point', image: 'bg-aqua-vantage' },
-        { name: 'Yoga Lawn', image: 'bg-aqua-yoga' }
+        { name: 'Outdoor Fitness Zones', image: terraImageAssignments['Outdoor Fitness Zones'] },
+        { name: 'Gathering Zones', image: terraImageAssignments['Gathering Zones'] },
+        { name: 'Sandpit Area', image: terraImageAssignments['Sandpit Area'] },
+        { name: 'Kids Play Area', image: terraImageAssignments['Kids Play Area'] },
+        { name: 'Terrace Lawn', image: terraImageAssignments['Terrace Lawn'] },
+        { name: 'Ultra-Luxury Lounge', image: terraImageAssignments['Ultra-Luxury Lounge'] },
+        { name: 'Biophilic Seating Arena', image: terraImageAssignments['Biophilic Seating Arena'] },
+        { name: 'Vantage Point', image: terraImageAssignments['Vantage Point'] },
+        { name: 'Yoga Lawn', image: terraImageAssignments['Yoga Lawn'] }
       ],
       bgClass: 'bg-autumn'
     },
@@ -131,7 +160,11 @@ const EraSeasons: React.FC = () => {
     'bg-terra-jacuzzi': 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/jacuzzi.jpg',
     'bg-avia-amphitheatre': 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/amphi.jpg',
     'bg-avia-vantage': 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/vantage-avia.jpg',
-    'bg-aqua-vantage': 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/vantage-terra.jpg'
+    'bg-aqua-vantage': 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/vantage-terra.jpg',
+    // Terra random images
+    'terra-random-0': 'https://d3p1hokpi6aqc3.cloudfront.net/Avia_Pod_1.png',
+    'terra-random-1': 'https://d3p1hokpi6aqc3.cloudfront.net/Aminites_Tera_Pods_3.png',
+    'terra-random-2': 'https://d3p1hokpi6aqc3.cloudfront.net/Aminites_Tera_Pods_2.png'
   };
 
   const getBackgroundImage = (bgClass: string): string => {
