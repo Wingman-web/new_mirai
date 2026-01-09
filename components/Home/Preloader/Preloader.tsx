@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 
-export default function VideoPreloader() {
+interface VideoPreloaderProps {
+  onComplete?: () => void;
+}
+
+export default function VideoPreloader({ onComplete }: VideoPreloaderProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);
 
@@ -10,8 +14,9 @@ export default function VideoPreloader() {
     
     if (hasSeenPreloader) {
       setIsLoading(false);
+      onComplete?.();
     }
-  }, []);
+  }, [onComplete]);
 
   const handleVideoEnd = () => {
     // Start fade out animation
@@ -21,6 +26,7 @@ export default function VideoPreloader() {
     setTimeout(() => {
       sessionStorage.setItem('preloaderShown', 'true');
       setIsLoading(false);
+      onComplete?.();
     }, 500);
   };
 
