@@ -1,7 +1,7 @@
 'use client'; // Add this at the top if using App Router
 
 import React from 'react'
-import VideoPreloader from './Preloader/VideoPreloader' // Import the preloader
+import VideoPreloader from './Preloader/Preloader' // Import the preloader
 import Hero from './Hero/Hero'
 import { RevealZoom } from './Gateway/Gateway' 
 import Mirai_Grace from './Mirai_Grace/Mirai_Grace'
