@@ -1,4 +1,5 @@
 'use client'
+
 import React, { useRef, useEffect, useState, useCallback, useMemo, memo } from 'react'
 import Image from 'next/image'
 
@@ -10,41 +11,11 @@ const Hero = memo(function Hero() {
   const [videoReady, setVideoReady] = useState(false)
   const [isHidden, setIsHidden] = useState(false)
 
-  // Play video on mount and handle ready state
+  // Play video on mount
   useEffect(() => {
     const video = videoRef.current
-    if (!video) return
-
-    const playVideo = () => {
+    if (video) {
       video.play().catch(() => {})
-    }
-
-    const handleCanPlay = () => {
-      setVideoReady(true)
-      playVideo()
-    }
-
-    // Check if video is already ready (cached)
-    if (video.readyState >= 3) {
-      setVideoReady(true)
-      playVideo()
-    } else {
-      video.addEventListener('canplay', handleCanPlay)
-      video.addEventListener('canplaythrough', handleCanPlay)
-      video.addEventListener('loadeddata', handleCanPlay)
-      
-      // Fallback: show video after timeout even if events don't fire
-      const fallbackTimer = setTimeout(() => {
-        setVideoReady(true)
-        playVideo()
-      }, 2000)
-
-      return () => {
-        video.removeEventListener('canplay', handleCanPlay)
-        video.removeEventListener('canplaythrough', handleCanPlay)
-        video.removeEventListener('loadeddata', handleCanPlay)
-        clearTimeout(fallbackTimer)
-      }
     }
   }, [])
 
@@ -61,6 +32,7 @@ const Hero = memo(function Hero() {
           const windowHeight = window.innerHeight
           const scrollHeight = document.documentElement.scrollHeight
           const distanceFromBottom = scrollHeight - (scrollY + windowHeight)
+
           const pastHeroSection = scrollY >= windowHeight - 5
           const nearBottom = distanceFromBottom < 200
 
@@ -107,8 +79,7 @@ const Hero = memo(function Hero() {
     zIndex: 5,
     opacity: isHidden ? 0 : 1,
     visibility: isHidden ? 'hidden' : 'visible',
-    pointerEvents: isHidden ? 'none' : 'auto',
-    transition: 'opacity 0.3s ease-in-out, visibility 0.3s ease-in-out'
+    pointerEvents: isHidden ? 'none' : 'auto'
   }), [isHidden])
 
   const placeholderStyle = useMemo<React.CSSProperties>(() => ({
@@ -117,7 +88,7 @@ const Hero = memo(function Hero() {
 
   return (
     <section
-      className="fixed top-0 left-0 w-full h-screen overflow-hidden bg-black"
+      className="fixed top-0 left-0 w-full h-screen overflow-hidden bg-black transition-opacity duration-300"
       style={sectionStyle}
     >
       {/* Logo - top center with full-width lines */}
@@ -152,10 +123,8 @@ const Hero = memo(function Hero() {
         playsInline
         preload="auto"
         style={videoStyle}
-        onCanPlay={handleVideoReady}
         onCanPlayThrough={handleVideoReady}
         onLoadedData={handleVideoReady}
-        onPlaying={handleVideoReady}
       >
         <source src={VIDEO_SRC} type="video/mp4" />
       </video>
@@ -164,4 +133,5 @@ const Hero = memo(function Hero() {
 })
 
 Hero.displayName = 'Hero'
+
 export default Hero
