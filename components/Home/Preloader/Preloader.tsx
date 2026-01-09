@@ -29,31 +29,7 @@ export default function VideoPreloader() {
   };
 
   if (!isLoading) {
-    return (
-      <div style={{ padding: '40px', textAlign: 'center' }}>
-        <h1 style={{ marginBottom: '20px' }}>Welcome to the Homepage</h1>
-        <p style={{ marginBottom: '20px', color: '#666' }}>
-          The preloader has been shown. Refresh the page to see it again.
-        </p>
-        <button
-          onClick={() => {
-            sessionStorage.removeItem('preloaderShown');
-            window.location.reload();
-          }}
-          style={{
-            padding: '12px 24px',
-            background: '#0070f3',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '16px'
-          }}
-        >
-          Reset & Show Preloader Again
-        </button>
-      </div>
-    );
+    return null;
   }
 
   return (
@@ -112,12 +88,14 @@ export default function VideoPreloader() {
             zIndex: 10000
           }}
           onMouseEnter={(e) => {
-            e.target.style.background = 'rgba(255, 255, 255, 0.3)';
-            e.target.style.transform = 'translateY(-2px)';
+            const target = e.currentTarget;
+            target.style.background = 'rgba(255, 255, 255, 0.3)';
+            target.style.transform = 'translateY(-2px)';
           }}
           onMouseLeave={(e) => {
-            e.target.style.background = 'rgba(255, 255, 255, 0.2)';
-            e.target.style.transform = 'translateY(0)';
+            const target = e.currentTarget;
+            target.style.background = 'rgba(255, 255, 255, 0.2)';
+            target.style.transform = 'translateY(0)';
           }}
         >
           Skip →
