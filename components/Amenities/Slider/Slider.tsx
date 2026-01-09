@@ -43,11 +43,6 @@ const tabsData: TabData[] = [
         caption: 'Pickleball Court',
       },
       {
-        src: 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/tennius-court.jpg',
-        alt: 'Multipurpose Court',
-        caption: 'Multipurpose Court',
-      },
-      {
         src: 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/criket-net.jpg',
         alt: 'Cricket Nets',
         caption: 'Cricket Nets',

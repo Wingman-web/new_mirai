@@ -23,20 +23,22 @@ const EraSeasons: React.FC = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(true);
 
+
+
   const seasons: Seasons = {
     spring: {
       title: 'TERRA',
       description: '',
       amenities: [
-        { name: 'Outdoor Fitness Zones', image: 'bg-aqua-fitness' },
-        { name: 'Gathering Zones', image: 'bg-aqua-gathering' },
-        { name: 'Sandpit Area', image: 'bg-aqua-sandpit' },
-        { name: 'Kids Play Area', image: 'bg-aqua-kids' },
-        { name: 'Terrace Lawn', image: 'bg-aqua-lawn' },
-        { name: 'Ultra-Luxury Lounge', image: 'bg-aqua-lounge' },
-        { name: 'Biophilic Seating Arena', image: 'bg-aqua-biophilic' },
-        { name: 'Vantage Point', image: 'bg-aqua-vantage' },
-        { name: 'Yoga Lawn', image: 'bg-aqua-yoga' }
+        { name: 'Outdoor Fitness Zones', image: 'bg-terra-1' },   // 1
+        { name: 'Gathering Zones', image: 'bg-terra-2' },          // 2
+        { name: 'Sandpit Area', image: 'bg-terra-3' },             // 3
+        { name: 'Kids Play Area', image: 'bg-terra-1' },           // 1
+        { name: 'Terrace Lawn', image: 'bg-terra-2' },             // 2
+        { name: 'Ultra-Luxury Lounge', image: 'bg-terra-3' },      // 3
+        { name: 'Biophilic Seating Arena', image: 'bg-terra-1' },  // 1
+        { name: 'Vantage Point', image: 'bg-terra-2' },            // 2
+        { name: 'Yoga Lawn', image: 'bg-terra-3' }                 // 3
       ],
       bgClass: 'bg-autumn'
     },
@@ -44,14 +46,14 @@ const EraSeasons: React.FC = () => {
       title: 'AQUA',
       description: '',
       amenities: [
-        { name: 'Infinity Swimming Pool', image: 'bg-terra-pool' },
-        { name: 'Outdoor Beach Deck with Seating Kiosks', image: 'bg-terra-deck' },
-        { name: 'Green Islands', image: 'bg-terra-islands' },
-        { name: 'Kids Pool', image: 'bg-terra-jacuzzi' },
-        { name: 'Private Dining Area', image: 'bg-terra-dining' },
-        { name: 'Private Bar Counter', image: 'bg-terra-bar' },
-        { name: 'Water Pavilion', image: 'bg-terra-pavilion' },
-        { name: 'Vantage Point', image: 'bg-terra-vantage' }
+        { name: 'Infinity Swimming Pool', image: 'bg-aqua-1' },                  // 1
+        { name: 'Outdoor Beach Deck with Seating Kiosks', image: 'bg-aqua-2' },  // 2
+        { name: 'Green Islands', image: 'bg-aqua-3' },                           // 3
+        { name: 'Kids Pool', image: 'bg-aqua-4' },                               // 4
+        { name: 'Private Dining Area', image: 'bg-aqua-1' },                     // 1
+        { name: 'Private Bar Counter', image: 'bg-aqua-2' },                     // 2
+        { name: 'Water Pavilion', image: 'bg-aqua-3' },                          // 3
+        { name: 'Vantage Point', image: 'bg-aqua-4' }                            // 4
       ],
       bgClass: 'bg-summer'
     },
@@ -59,16 +61,16 @@ const EraSeasons: React.FC = () => {
       title: 'PYRO',
       description: '',
       amenities: [
-        { name: 'Agni-Water Sculptures', image: 'bg-pyro-agni' },
-        { name: 'Ultra-Luxury Lounge', image: 'bg-pyro-lounge' },
-        { name: 'Bonfire Arena', image: 'bg-pyro-bonfire' },
-        { name: 'Barbeque Area', image: 'bg-pyro-bbq' },
-        { name: 'Bar Counter/Juice Station', image: 'bg-pyro-bar' },
-        { name: 'Gathering Lawn', image: 'bg-pyro-lawn' },
-        { name: 'Lava Walk Zone', image: 'bg-pyro-lava' },
-        { name: 'Flame Seating Pods', image: 'bg-pyro-flame' },
-        { name: 'Senior Citizens Corner', image: 'bg-pyro-senior' },
-        { name: 'Vantage Point', image: 'bg-pyro-vantage' }
+        { name: 'Agni-Water Sculptures', image: 'bg-pyro-1' },      // 1
+        { name: 'Ultra-Luxury Lounge', image: 'bg-pyro-2' },        // 2
+        { name: 'Bonfire Arena', image: 'bg-pyro-3' },              // 3
+        { name: 'Barbeque Area', image: 'bg-pyro-1' },              // 1
+        { name: 'Bar Counter/Juice Station', image: 'bg-pyro-2' }, // 2
+        { name: 'Gathering Lawn', image: 'bg-pyro-3' },             // 3
+        { name: 'Lava Walk Zone', image: 'bg-pyro-1' },             // 1
+        { name: 'Flame Seating Pods', image: 'bg-pyro-2' },         // 2
+        { name: 'Senior Citizens Corner', image: 'bg-pyro-3' },     // 3
+        { name: 'Vantage Point', image: 'bg-pyro-1' }               // 1
       ],
       bgClass: 'bg-winter'
     },
@@ -76,13 +78,13 @@ const EraSeasons: React.FC = () => {
       title: 'AVIA',
       description: '',
       amenities: [
-        { name: 'Amphitheatre with Advent Seating Zone', image: 'bg-avia-amphitheatre' },
-        { name: 'Sculpture Pod', image: 'bg-avia-sculpture' },
-        { name: 'Digital Presentation Room', image: 'bg-avia-digital' },
-        { name: 'Meeting Rooms', image: 'bg-avia-meeting' },
-        { name: 'Interactive Water Plaza', image: 'bg-avia-waterplaza' },
-        { name: 'Bar Counter', image: 'bg-avia-bar' },
-        { name: 'Vantage Point', image: 'bg-avia-vantage' }
+        { name: 'Amphitheatre with Advent Seating Zone', image: 'bg-avia-1' },  // 1
+        { name: 'Sculpture Pod', image: 'bg-avia-2' },                           // 2
+        { name: 'Digital Presentation Room', image: 'bg-avia-3' },               // 3
+        { name: 'Meeting Rooms', image: 'bg-avia-1' },                           // 1
+        { name: 'Interactive Water Plaza', image: 'bg-avia-2' },                 // 2
+        { name: 'Bar Counter', image: 'bg-avia-3' },                             // 3
+        { name: 'Vantage Point', image: 'bg-avia-1' }                            // 1
       ],
       bgClass: 'bg-spring'
     }
@@ -122,16 +124,33 @@ const EraSeasons: React.FC = () => {
   ]);
 
   const backgroundImages: { [key: string]: string } = {
-    'bg-spring': 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/aqua.png',
-    'bg-summer': 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/avia.jpg',
-    'bg-autumn': 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/terra.jpg',
-    'bg-winter': 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/pyro.png',
+    'bg-spring': 'https://d3p1hokpi6aqc3.cloudfront.net/AQUA%20POD_1.png',
+    'bg-summer': 'https://d3p1hokpi6aqc3.cloudfront.net/Avia_Pod_1.png',
+    'bg-autumn': 'https://d3p1hokpi6aqc3.cloudfront.net/Aminites_Tera_Pods_1.png',
+    'bg-winter': 'https://azure-baboon-302476.hostingersite.com/mirai_latest/media/pods/pyro_pod.png',
     'bg-terra-pool': 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/infinitypool.jpg',
     'bg-terra-vantage': 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/vantagepoint.jpg',
     'bg-terra-jacuzzi': 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/jacuzzi.jpg',
     'bg-avia-amphitheatre': 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/amphi.jpg',
     'bg-avia-vantage': 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/vantage-avia.jpg',
-    'bg-aqua-vantage': 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/vantage-terra.jpg'
+    'bg-aqua-vantage': 'https://pavanimirai.com/55storeys-luxury-apartments-in-financial-district/media/vantage-terra.jpg',
+    // Terra images
+    'bg-terra-1': 'https://d3p1hokpi6aqc3.cloudfront.net/Aminites_Tera_Pods_1.png',
+    'bg-terra-2': 'https://d3p1hokpi6aqc3.cloudfront.net/Aminites_Tera_Pods_2.png',
+    'bg-terra-3': 'https://azure-baboon-302476.hostingersite.com/mirai_latest/media/pods/terravantage.png',
+    // Aqua images
+    'bg-aqua-1': 'https://d3p1hokpi6aqc3.cloudfront.net/AQUA%20POD_1.png',
+    'bg-aqua-2': 'https://d3p1hokpi6aqc3.cloudfront.net/AQUA%20POD_2.png',
+    'bg-aqua-3': 'https://d3p1hokpi6aqc3.cloudfront.net/AQUA%20POD_3.png',
+    'bg-aqua-4': 'https://d3p1hokpi6aqc3.cloudfront.net/AQUA%20POD_4.png',
+    // Pyro images
+    'bg-pyro-1': 'https://d3p1hokpi6aqc3.cloudfront.net/Pyro_Pod_1.png',
+    'bg-pyro-2': 'https://d3p1hokpi6aqc3.cloudfront.net/Pyro_pod_2.png',
+    'bg-pyro-3': 'https://d3p1hokpi6aqc3.cloudfront.net/Pyro_Pod_3.png',
+    // Avia images
+    'bg-avia-1': 'https://d3p1hokpi6aqc3.cloudfront.net/Avia_%20Pod_1.png',
+    'bg-avia-2': 'https://d3p1hokpi6aqc3.cloudfront.net/Avia_Pod_2.png',
+    'bg-avia-3': 'https://d3p1hokpi6aqc3.cloudfront.net/Avia_%20Pod_3.png'
   };
 
   const getBackgroundImage = (bgClass: string): string => {

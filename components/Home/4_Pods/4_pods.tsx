@@ -71,7 +71,7 @@ const AnimatedElement: React.FC<AnimatedElementProps> = memo(({
 
 AnimatedElement.displayName = 'AnimatedElement';
 
-const BLUR_TEXT_CONTENT = "At 220 metres, the elements rise and shape themselves into an elevated world of leisure and luxury in perfect harmony - the four sculpted Sky Pods. Each pod here is an ode to the four eternal elements of nature. Beyond them, space unfolds as the fifth, while Pavani Mirai gives rise to the sixth - life itself.";
+const BLUR_TEXT_CONTENT = "At 720 Ft, the elements rise and shape themselves into an elevated world of leisure and luxury in perfect harmony - the four sculpted Sky Pods. Each pod here is an ode to the four eternal elements of nature. Beyond them, space unfolds as the fifth, while Pavani Mirai gives rise to the sixth - life itself.";
 
 const MiraiPodsIntro: React.FC = memo(() => {
   return (
