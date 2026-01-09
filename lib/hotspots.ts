@@ -15,7 +15,7 @@ export const defaultHotspots: HotspotData[] = [
   { id: 'hp-flipside', pitch: -17, yaw: 260, title: 'Flipside Adventure Park', distance: '2 Mins', icon: 'park' },
   { id: 'hp-fishermens', pitch: -19, yaw: 220, title: "The Fishermens Wharf", distance: '2 Mins', icon: 'restaurant' },
   { id: 'hp-tabula', pitch: -8, yaw: 50, title: 'Tabula Rasa', distance: '2 Mins', icon: 'restaurant' },
-  { id: 'hp-vanlavino', pitch: -23, yaw: 150, title: 'Van Lavino', distance: '2 Mins', icon: 'restaurant' },
+  { id: 'hp-vanlavino', pitch: -25, yaw: 150, title: 'Van Lavino', distance: '2 Mins', icon: 'restaurant' },
   { id: 'hp-golf', pitch: -15, yaw: 266, title: 'One Golf Brewery & Moai', distance: '2 Mins', icon: 'golf' },
   { id: 'hp-keystone', pitch: -5, yaw: 90, title: 'Keystone School', distance: '5 Mins', icon: 'school' },
   { id: 'hp-isb', pitch: -1, yaw: 370, title: 'ISB', distance: '5 Mins', icon: 'school' },
