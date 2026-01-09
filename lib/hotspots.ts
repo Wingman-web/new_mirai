@@ -35,7 +35,7 @@ export const defaultHotspots: HotspotData[] = [
   { id: 'hp-iiit', pitch: 1, yaw: 375, title: 'IIIT Hyderabad', distance: '10 Mins', icon: 'university' },
   { id: 'hp-cbit', pitch: -3, yaw: 210, title: 'CBIT', distance: '10 Mins', icon: 'university' },
   { id: 'hp-hcu', pitch: 1, yaw: 322, title: 'Hyderabad Central University', distance: '10 Mins', icon: 'university' },
-  { id: 'hp-airport', pitch: 0, yaw: 135, title: 'Airport', distance: '30 Mins', icon: 'airport' },
+  { id: 'hp-airport', pitch: 0, yaw: 105, title: 'Airport', distance: '30 Mins', icon: 'airport' },
 ];
 
 export const DEFAULT_ROTATION_DURATION = 30000;
