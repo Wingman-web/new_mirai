@@ -47,7 +47,7 @@ export default function RootLayout({
         {/* Favicons */}
         <link rel="icon" href="/favicon.png" />
         <link rel="icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png" />
+        <link rel="apple-touch-icon" sizes="32x32" href="/favicon.png" />
       </head>
       <body className="antialiased">
         {/* Server-rendered black overlay to show immediately during initial load */}
