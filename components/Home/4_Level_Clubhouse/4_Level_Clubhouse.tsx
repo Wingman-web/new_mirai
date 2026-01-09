@@ -70,7 +70,7 @@ const AnimatedElement: React.FC<AnimatedElementProps> = memo(({
 
 AnimatedElement.displayName = 'AnimatedElement';
 
-const BLUR_TEXT_CONTENT = "Nature crafted five elements - Earth that grounds us. Water that nourishes us. Fire that warms us. Air that breathes through us. Space that holds us.";
+const BLUR_TEXT_CONTENT = "The 1,01,415 sft. Clubhouse at Mirai is built for every version of you. The different storeys here become a world in itself, designed for every moment to be enjoyed by everybody.";
 
 function ClubhouseIntro() {
   return (
