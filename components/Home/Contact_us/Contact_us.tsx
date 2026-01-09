@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+
 const dayViewPath = '/images/day_view.png';
 
 export default function ContactForm() {
   const [bgLoaded, setBgLoaded] = useState(false);
   const [bgError, setBgError] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     // Load Migra font from Fontshare
@@ -23,12 +25,54 @@ export default function ContactForm() {
       setBgError(true);
     };
     img.src = dayViewPath;
+
     return () => {
       img.onload = null;
       img.onerror = null;
       document.head.removeChild(link);
     };
   }, []);
+
+  // Scroll handler to show/hide contact form
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    let ticking = false;
+
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const scrollY = window.scrollY;
+          const windowHeight = window.innerHeight;
+          const scrollHeight = document.documentElement.scrollHeight;
+          
+          // Calculate how far from the bottom we are
+          const distanceFromBottom = scrollHeight - (scrollY + windowHeight);
+          
+          // Show contact form when near the bottom (within 1 viewport height)
+          // Adjust this threshold as needed
+          const shouldShow = distanceFromBottom < windowHeight;
+          
+          setIsVisible(shouldShow);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // Check initial state
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const sectionStyle: React.CSSProperties = {
+    zIndex: 1,
+    opacity: isVisible ? 1 : 0,
+    visibility: isVisible ? 'visible' : 'hidden',
+    transition: 'opacity 0.5s ease-in-out, visibility 0.5s ease-in-out',
+    pointerEvents: isVisible ? 'auto' : 'none'
+  };
 
   const formContent = (
     <div 
@@ -100,7 +144,7 @@ export default function ContactForm() {
       <section
         id="contact-section"
         className="fixed inset-0 flex items-center justify-start bg-gray-100"
-        style={{ zIndex: 1 }}
+        style={sectionStyle}
       >
         <div className="absolute inset-0 -z-10 bg-linear-to-r from-white via-gray-100 to-white" aria-hidden="true" />
         <div className="relative z-10 h-full pl-6 lg:pl-12">
@@ -116,7 +160,7 @@ export default function ContactForm() {
     <section
       id="contact-section"
       className="fixed inset-0 flex items-center justify-start bg-black"
-      style={{ zIndex: 1 }}
+      style={sectionStyle}
     >
       {/* Background Image (render only if it loaded without error) */}
       {!bgError && (
@@ -131,8 +175,6 @@ export default function ContactForm() {
           />
         </div>
       )}
-      
-      {/* Removed dark overlay so background image displays at full brightness */}
       
       <div className="relative z-10 h-full pl-6 lg:pl-12">
         <div className="flex items-center justify-start h-full">
