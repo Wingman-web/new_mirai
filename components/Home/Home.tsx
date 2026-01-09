@@ -79,14 +79,13 @@ const Home = () => {
           transition: 'opacity 0.5s ease-in'
         }}
       >
-        {/* Hero - fixed position, sits behind scrolling content */}
-        <Hero />
-        
-        {/* Spacer for Hero - transparent, just takes up space */}
-        <div className="h-screen" aria-hidden="true" />
-        
-        {/* Main scrolling content - starts after hero spacer */}
         <div className="relative z-10 bg-black">
+          {/* Hero will be visible immediately after preloader */}
+          <Hero />
+          
+          {/* Spacer for Hero */}
+          <div className="h-screen" aria-hidden="true" />
+          
           {/* Rest of content - hidden until page fully loads */}
           <div
             style={{
@@ -95,12 +94,12 @@ const Home = () => {
               pointerEvents: isPageFullyLoaded ? 'auto' : 'none'
             }}
           >
-            {/* SixthElement */}
+            {/* SixthElement - Using z-index 10 */}
             <div className="relative" style={{ zIndex: 10 }}>
               <SixthElement />
             </div>
             
-            {/* RevealZoom */}
+            {/* RevealZoom - Using z-index 11 (next in line) */}
             <section 
               aria-label="Reveal zoom" 
               className="relative bg-black"
@@ -109,7 +108,7 @@ const Home = () => {
               <RevealZoom />
             </section>
             
-            {/* Mirai Grace */}
+            {/* Following sections continue the ladder */}
             <section 
               aria-label="Scroll video" 
               className="relative bg-black"
@@ -118,7 +117,6 @@ const Home = () => {
               <Mirai_Grace />
             </section>
             
-            {/* Remaining sections */}
             <div style={{ position: 'relative', zIndex: 13 }}>
               <MiraiPodsIntro />
               <MiraiPodsSlider />
@@ -128,8 +126,7 @@ const Home = () => {
             </div>
           </div>
         </div>
-        
-        {/* Fixed UI layers */}
+        {/* Fixed UI layers remain at the bottom/top of the stack */}
         <ContactForm />
         <div className="relative h-screen" style={{ zIndex: 0 }} />
         <Footer />
