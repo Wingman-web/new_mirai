@@ -70,91 +70,60 @@ const Home = () => {
       {/* Video Preloader - highest z-index */}
       {!isPreloaderComplete && <VideoPreloader onComplete={handlePreloaderComplete} />}
       
-      {/* Loading overlay after preloader */}
-      {isPreloaderComplete && !isPageFullyLoaded && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100vw',
-            height: '100vh',
-            zIndex: 9999,
-            background: '#000',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'white'
-          }}
-        >
-          <div style={{ textAlign: 'center' }}>
-            <div
-              style={{
-                width: '50px',
-                height: '50px',
-                border: '3px solid rgba(255, 255, 255, 0.3)',
-                borderTop: '3px solid white',
-                borderRadius: '50%',
-                animation: 'spin 1s linear infinite'
-              }}
-            />
-            <p style={{ marginTop: '20px', fontSize: '14px', opacity: 0.7 }}>
-              Loading content...
-            </p>
-          </div>
-          <style jsx>{`
-            @keyframes spin {
-              0% { transform: rotate(0deg); }
-              100% { transform: rotate(360deg); }
-            }
-          `}</style>
-        </div>
-      )}
-      
       <div 
         className="relative bg-black w-full overflow-x-hidden"
         style={{
           minHeight: '100vh',
           visibility: isPreloaderComplete ? 'visible' : 'hidden',
-          opacity: isPageFullyLoaded ? 1 : 0,
+          opacity: isPreloaderComplete ? 1 : 0,
           transition: 'opacity 0.5s ease-in'
         }}
       >
         <div className="relative z-10 bg-black">
+          {/* Hero will be visible immediately after preloader */}
           <Hero />
           
           {/* Spacer for Hero */}
           <div className="h-screen" aria-hidden="true" />
           
-          {/* SixthElement - Using z-index 10 */}
-          <div className="relative" style={{ zIndex: 10 }}>
-            <SixthElement />
-          </div>
-          
-          {/* RevealZoom - Using z-index 11 (next in line) */}
-          <section 
-            aria-label="Reveal zoom" 
-            className="relative bg-black"
-            style={{ zIndex: 11, isolation: 'isolate' }}
+          {/* Rest of content - hidden until page fully loads */}
+          <div
+            style={{
+              opacity: isPageFullyLoaded ? 1 : 0,
+              transition: 'opacity 0.8s ease-in',
+              pointerEvents: isPageFullyLoaded ? 'auto' : 'none'
+            }}
           >
-            <RevealZoom />
-          </section>
-          
-          {/* Following sections continue the ladder */}
-          <section 
-            aria-label="Scroll video" 
-            className="relative bg-black"
-            style={{ zIndex: 12 }}
-          >
-            <Mirai_Grace />
-          </section>
-          
-          <div style={{ position: 'relative', zIndex: 13 }}>
-            <MiraiPodsIntro />
-            <MiraiPodsSlider />
-            <ClubhouseIntro />
-            <MiraiClubhouse />
-            <InteractiveMap />
+            {/* SixthElement - Using z-index 10 */}
+            <div className="relative" style={{ zIndex: 10 }}>
+              <SixthElement />
+            </div>
+            
+            {/* RevealZoom - Using z-index 11 (next in line) */}
+            <section 
+              aria-label="Reveal zoom" 
+              className="relative bg-black"
+              style={{ zIndex: 11, isolation: 'isolate' }}
+            >
+              <RevealZoom />
+            </section>
+            
+            {/* Following sections continue the ladder */}
+            <section 
+              aria-label="Scroll video" 
+              className="relative bg-black"
+              style={{ zIndex: 12 }}
+            >
+              <Mirai_Grace />
+            </section>
+            
+            <div style={{ position: 'relative', zIndex: 13 }}>
+              <MiraiPodsIntro />
+              <MiraiPodsSlider />
+              <ClubhouseIntro />
+              <MiraiClubhouse />
+              <InteractiveMap />
+            </div>
           </div>
         </div>
         {/* Fixed UI layers remain at the bottom/top of the stack */}
