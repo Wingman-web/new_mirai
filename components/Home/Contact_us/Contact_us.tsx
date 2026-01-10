@@ -7,7 +7,6 @@ const dayViewPath = '/images/day_view.png';
 export default function ContactForm() {
   const [bgError, setBgError] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     // Load Migra font from Fontshare
@@ -22,24 +21,9 @@ export default function ContactForm() {
     };
     img.src = dayViewPath;
 
-    // Show ContactForm only when scrolled near the bottom
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const docHeight = document.documentElement.scrollHeight;
-      
-      // Show when within 2 screen heights from bottom
-      const distanceFromBottom = docHeight - (scrollY + windowHeight);
-      setIsVisible(distanceFromBottom < windowHeight * 2);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-
     return () => {
       img.onerror = null;
       document.head.removeChild(link);
-      window.removeEventListener('scroll', handleScroll);
     };
   }, []);
 
@@ -110,13 +94,8 @@ export default function ContactForm() {
   return (
     <section
       id="contact-section"
-      className="fixed inset-0 w-full h-screen flex items-center justify-start overflow-hidden transition-opacity duration-300"
-      style={{ 
-        zIndex: 2,
-        opacity: isVisible ? 1 : 0,
-        visibility: isVisible ? 'visible' : 'hidden',
-        pointerEvents: isVisible ? 'auto' : 'none'
-      }}
+      className="fixed inset-0 w-full h-screen flex items-center justify-start overflow-hidden"
+      style={{ zIndex: 1 }}
     >
       {/* Background Image */}
       <div className="absolute inset-0">
