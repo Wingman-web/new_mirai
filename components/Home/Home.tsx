@@ -14,24 +14,59 @@ import ContactForm from './Contact_us/Contact_us'
 import Footer from './Footer/Footer'
 import SixthElement from './Sixth_Element/Sixth_element'
 
+// Critical images to preload
+const CRITICAL_IMAGES = [
+  '/images/logo_1.png',
+  '/images/sixth_ment.png',
+  '/images/gateway/reveal.png',
+  '/images/gateway/mirai.png',
+  '/images/gateway/shape-two.png',
+];
+
 const Home = () => {
   const [isPreloaderComplete, setIsPreloaderComplete] = useState(false);
   const [hasCheckedSession, setHasCheckedSession] = useState(false);
   const [isPageReady, setIsPageReady] = useState(false);
+  const [assetsLoaded, setAssetsLoaded] = useState(false);
 
+  // Check session and preload critical assets
   useEffect(() => {
-    // Check if preloader was already shown in this session
     const hasSeenPreloader = sessionStorage.getItem('preloaderShown');
     
     if (hasSeenPreloader) {
       setIsPreloaderComplete(true);
     }
     setHasCheckedSession(true);
+
+    // Preload critical images
+    let loadedCount = 0;
+    const totalImages = CRITICAL_IMAGES.length;
+
+    const checkAllLoaded = () => {
+      loadedCount++;
+      if (loadedCount >= totalImages) {
+        setAssetsLoaded(true);
+      }
+    };
+
+    CRITICAL_IMAGES.forEach((src) => {
+      const img = new Image();
+      img.onload = checkAllLoaded;
+      img.onerror = checkAllLoaded; // Continue even if image fails
+      img.src = src;
+    });
+
+    // Fallback - if images take too long, proceed anyway after 3 seconds
+    const fallbackTimer = setTimeout(() => {
+      setAssetsLoaded(true);
+    }, 3000);
+
+    return () => clearTimeout(fallbackTimer);
   }, []);
 
   // Disable scrolling until page is ready
   useEffect(() => {
-    if (!isPreloaderComplete) {
+    if (!isPreloaderComplete || !assetsLoaded) {
       document.body.style.overflow = 'hidden';
       document.documentElement.style.overflow = 'hidden';
       return;
@@ -41,11 +76,12 @@ const Home = () => {
     document.documentElement.style.overflow = 'hidden';
 
     const enableScroll = () => {
+      // Wait for window load + small delay
       setTimeout(() => {
         document.body.style.overflow = '';
         document.documentElement.style.overflow = '';
         setIsPageReady(true);
-      }, 800);
+      }, 500);
     };
 
     if (document.readyState === 'complete') {
@@ -59,19 +95,26 @@ const Home = () => {
       document.body.style.overflow = '';
       document.documentElement.style.overflow = '';
     };
-  }, [isPreloaderComplete]);
+  }, [isPreloaderComplete, assetsLoaded]);
 
   const handlePreloaderComplete = () => {
     sessionStorage.setItem('preloaderShown', 'true');
     setIsPreloaderComplete(true);
   };
 
+  // Wait until session is checked
   if (!hasCheckedSession) {
-    return null;
+    return <div className="w-full h-screen bg-black" />;
   }
 
+  // Show preloader if not seen
   if (!isPreloaderComplete) {
     return <VideoPreloader onComplete={handlePreloaderComplete} />;
+  }
+
+  // Wait for assets to load
+  if (!assetsLoaded) {
+    return <div className="w-full h-screen bg-black" />;
   }
 
   return (
@@ -88,7 +131,14 @@ const Home = () => {
         <div className="h-screen" aria-hidden="true" />
         
         {/* Content sections - z-index 10, scrolls over Hero */}
-        <div className="relative" style={{ zIndex: 10 }}>
+        <div 
+          className="relative" 
+          style={{ 
+            zIndex: 10,
+            opacity: isPageReady ? 1 : 0,
+            transition: 'opacity 0.5s ease'
+          }}
+        >
           {/* SixthElement - transparent background, shows Hero video behind */}
           <SixthElement />
           
