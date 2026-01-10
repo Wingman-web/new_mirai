@@ -5,7 +5,6 @@ import Image from 'next/image';
 const dayViewPath = '/images/day_view.png';
 
 export default function ContactForm() {
-  const [bgLoaded, setBgLoaded] = useState(false);
   const [bgError, setBgError] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
 
@@ -17,14 +16,11 @@ export default function ContactForm() {
     document.head.appendChild(link);
 
     const img = new window.Image();
-    img.onload = () => setBgLoaded(true);
     img.onerror = () => {
-      setBgLoaded(true);
       setBgError(true);
     };
     img.src = dayViewPath;
     return () => {
-      img.onload = null;
       img.onerror = null;
       document.head.removeChild(link);
     };
@@ -94,33 +90,15 @@ export default function ContactForm() {
     </div>
   );
 
-  // Render a neutral placeholder until background image is ready
-  if (!bgLoaded) {
-    return (
-      <section
-        id="contact-section"
-        className="fixed inset-0 flex items-center justify-start bg-gray-100"
-        style={{ zIndex: 1 }}
-      >
-        <div className="absolute inset-0 -z-10 bg-linear-to-r from-white via-gray-100 to-white" aria-hidden="true" />
-        <div className="relative z-10 h-full pl-6 lg:pl-12">
-          <div className="flex items-center justify-start h-full">
-            {formContent}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
   return (
     <section
       id="contact-section"
-      className="fixed inset-0 flex items-center justify-start bg-black"
-      style={{ zIndex: 1 }}
+      className="fixed inset-0 w-full h-screen flex items-center justify-start overflow-hidden"
+      style={{ zIndex: 2 }}
     >
-      {/* Background Image (render only if it loaded without error) */}
-      {!bgError && (
-        <div className="absolute inset-0 -z-10">
+      {/* Background Image */}
+      <div className="absolute inset-0">
+        {!bgError && (
           <Image
             src={dayViewPath}
             alt="Day view"
@@ -129,11 +107,14 @@ export default function ContactForm() {
             unoptimized
             className="object-cover object-center"
           />
-        </div>
-      )}
+        )}
+        {/* Fallback gradient if image fails */}
+        {bgError && (
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100" />
+        )}
+      </div>
       
-      {/* Removed dark overlay so background image displays at full brightness */}
-      
+      {/* Form content */}
       <div className="relative z-10 h-full pl-6 lg:pl-12">
         <div className="flex items-center justify-start h-full">
           {formContent}
