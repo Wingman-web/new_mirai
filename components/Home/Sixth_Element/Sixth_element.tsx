@@ -69,7 +69,7 @@ export default function SixthElement() {
       ref={sectionRef} 
       className="relative w-full overflow-hidden"
       style={{ 
-        backgroundColor: 'transparent',
+        backgroundColor: '#000',
         zIndex: 10, 
         position: 'relative' 
       }}
