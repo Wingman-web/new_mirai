@@ -30,8 +30,6 @@ export function PanoramaViewer({
   const autoSeqTokenRef = useRef<{ cancel: boolean }>({ cancel: false });
   const pitchMonitorRef = useRef<number | null>(null);
   const rotatingRef = useRef<boolean>(false);
-  const isZoomingRef = useRef<boolean>(false);
-  const zoomTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
   const [isRotating, setIsRotating] = useState(false);
@@ -62,7 +60,7 @@ export function PanoramaViewer({
   }, []);
 
   const startAutoRotation = useCallback(() => {
-    if (!viewerRef.current || rotatingRef.current || isZoomingRef.current) return;
+    if (!viewerRef.current || rotatingRef.current) return;
 
     rotatingRef.current = true;
     setIsRotating(true);
@@ -72,7 +70,7 @@ export function PanoramaViewer({
     const startTime = Date.now();
 
     const animate = () => {
-      if (!viewerRef.current || autoSeqTokenRef.current.cancel || isZoomingRef.current) {
+      if (!viewerRef.current || autoSeqTokenRef.current.cancel) {
         return;
       }
 
@@ -91,32 +89,19 @@ export function PanoramaViewer({
     stopAutoRotation();
   }, [stopAutoRotation]);
 
-  // Debounced zoom handler to prevent glitches
+  // Fast zoom handler
   const handleZoom = useCallback((delta: number) => {
-    if (!viewerRef.current || isZoomingRef.current) return;
-    
-    isZoomingRef.current = true;
-    
-    // Clear any pending zoom timeout
-    if (zoomTimeoutRef.current) {
-      clearTimeout(zoomTimeoutRef.current);
-    }
+    if (!viewerRef.current) return;
     
     const currentHfov = viewerRef.current.getHfov();
-    const minHfov = 50;
+    const minHfov = 30; // Allow more zoom in
     const maxHfov = 120;
-    const zoomStep = 5;
+    const zoomStep = 15; // Faster zoom
     
     let newHfov = currentHfov + (delta > 0 ? zoomStep : -zoomStep);
     newHfov = Math.max(minHfov, Math.min(maxHfov, newHfov));
     
-    // Set new zoom level
     viewerRef.current.setHfov(newHfov);
-    
-    // Reset zooming flag after a short delay
-    zoomTimeoutRef.current = setTimeout(() => {
-      isZoomingRef.current = false;
-    }, 150);
   }, []);
 
   const createHotspotTooltip = useCallback((hs: HotspotData) => {
@@ -275,7 +260,7 @@ export function PanoramaViewer({
           pitch: initialPitch,
           yaw: initialYaw,
           hfov: initialHfov,
-          minHfov: 50,
+          minHfov: 30, // Allow more zoom in
           maxHfov: 120,
           autoLoad: true,
           showControls: false, // Hide default controls, we'll use custom
@@ -363,9 +348,6 @@ export function PanoramaViewer({
       }
       if (pitchMonitorRef.current) {
         cancelAnimationFrame(pitchMonitorRef.current);
-      }
-      if (zoomTimeoutRef.current) {
-        clearTimeout(zoomTimeoutRef.current);
       }
       if (viewerRef.current) {
         try {
