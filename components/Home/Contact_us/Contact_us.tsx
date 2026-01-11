@@ -55,7 +55,7 @@ export default function ContactForm() {
     <div 
       className="w-auto rounded-2xl p-8 md:p-10 border border-white/30"
       style={{ 
-        maxWidth: '340px',
+        maxWidth: '400px',
         background: 'rgba(255, 255, 255, 0.25)',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
