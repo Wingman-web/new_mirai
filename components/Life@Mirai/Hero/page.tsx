@@ -56,27 +56,30 @@ export default function MiraiHomesPage() {
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   const mainRef = useRef<HTMLElement>(null);
-  const scrollDistRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const blogRefs = useRef<(HTMLDivElement | null)[]>([]);
   const progressPathRef = useRef<SVGPathElement>(null);
 
   // GSAP Parallax and reveal animations
   useEffect(() => {
+    // Scroll to top on page load to reset position
+    window.scrollTo(0, 0);
+    
     const ctx = gsap.context(() => {
-      // Parallax animation for clouds and sky - only animates on scroll
-      gsap.timeline({
-        scrollTrigger: {
-          trigger: scrollDistRef.current,
-          start: "top top",
-          end: "bottom bottom",
-          scrub: 1,
-        },
-      })
-        .to(".sky", { y: -200 }, 0)
-        .to(".cloud1", { y: -800 }, 0)
-        .to(".cloud2", { y: -500 }, 0)
-        .to(".cloud3", { y: -650 }, 0);
+      // Parallax animation for clouds and sky - only animates on user scroll
+      ScrollTrigger.create({
+        trigger: heroRef.current,
+        start: "top top",
+        end: "bottom top",
+        scrub: 1,
+        onUpdate: (self) => {
+          const progress = self.progress;
+          gsap.set(".sky", { y: -200 * progress });
+          gsap.set(".cloud1", { y: -800 * progress });
+          gsap.set(".cloud2", { y: -500 * progress });
+          gsap.set(".cloud3", { y: -650 * progress });
+        }
+      });
 
       // Blog card reveal animations
       blogRefs.current.forEach((container, index) => {
@@ -146,9 +149,6 @@ export default function MiraiHomesPage() {
     <>
       {/* ==================== MAIN CONTENT ==================== */}
       <main ref={mainRef} className="bg-white">
-        {/* Scroll Distance Trigger */}
-        <div ref={scrollDistRef} className="h-[200vh] absolute w-full" />
-
         {/* ==================== PARALLAX HERO SECTION ==================== */}
         <section ref={heroRef} className="relative">
           <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto">
