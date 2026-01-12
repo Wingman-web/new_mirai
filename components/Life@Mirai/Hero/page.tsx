@@ -65,11 +65,11 @@ export default function MiraiHomesPage() {
     // Small delay to ensure DOM is ready
     const initTimeout = setTimeout(() => {
       const ctx = gsap.context(() => {
-        // Set initial positions for clouds to ensure they're visible
-        gsap.set(".sky", { y: 0 });
-        gsap.set(".cloud1", { y: 0 });
-        gsap.set(".cloud2", { y: 0 });
-        gsap.set(".cloud3", { y: 0 });
+        // Set initial positions for clouds - positioned correctly on page load
+        gsap.set(".sky", { y: 0, opacity: 1 });
+        gsap.set(".cloud1", { y: 0, opacity: 1 });
+        gsap.set(".cloud2", { y: 0, opacity: 1 });
+        gsap.set(".cloud3", { y: 0, opacity: 1 });
 
         // Parallax animation for clouds and sky
         // Using the hero section as trigger instead of a separate scroll distance div
@@ -198,31 +198,35 @@ export default function MiraiHomesPage() {
                 xlinkHref="https://azure-baboon-302476.hostingersite.com//mirai_/media/footer_img.png"
                 width="1200"
                 height="800"
+                y="0"
                 preserveAspectRatio="xMidYMid slice"
-                style={{ willChange: 'transform' }}
+                style={{ willChange: 'transform', opacity: 0 }}
               />
 
-              {/* Cloud layers - all visible initially */}
+              {/* Cloud layers - initially hidden until GSAP sets positions */}
               <image
                 className="cloud2"
                 xlinkHref="https://assets.codepen.io/721952/cloud2.png"
                 width="1200"
                 height="800"
-                style={{ willChange: 'transform' }}
+                y="0"
+                style={{ willChange: 'transform', opacity: 0 }}
               />
               <image
                 className="cloud1"
                 xlinkHref="https://assets.codepen.io/721952/cloud1.png"
                 width="1200"
                 height="800"
-                style={{ willChange: 'transform' }}
+                y="0"
+                style={{ willChange: 'transform', opacity: 0 }}
               />
               <image
                 className="cloud3"
                 xlinkHref="https://assets.codepen.io/721952/cloud3.png"
                 width="1200"
                 height="800"
-                style={{ willChange: 'transform' }}
+                y="0"
+                style={{ willChange: 'transform', opacity: 0 }}
               />
 
               <g mask="url(#m)">
