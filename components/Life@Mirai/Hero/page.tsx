@@ -237,7 +237,10 @@ export default function MiraiHomesPage() {
               showHeadText ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
             }`}
           >
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif mb-6 leading-tight drop-shadow-2xl" style={{ color: '#78252f' }}>
+            <h2 
+              className="text-3xl md:text-4xl lg:text-5xl font-serif mb-6 leading-tight drop-shadow-2xl" 
+              style={{ color: '#78252f' }}
+            >
               Here&apos;s What Life at the Sixth Element
               <br />
               Feels Like
