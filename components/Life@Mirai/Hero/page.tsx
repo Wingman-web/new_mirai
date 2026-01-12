@@ -65,12 +65,6 @@ export default function MiraiHomesPage() {
     // Small delay to ensure DOM is ready
     const initTimeout = setTimeout(() => {
       const ctx = gsap.context(() => {
-        // Set initial positions for clouds - positioned correctly on page load
-        gsap.set(".sky", { y: 0, opacity: 1 });
-        gsap.set(".cloud1", { y: 0, opacity: 1 });
-        gsap.set(".cloud2", { y: 0, opacity: 1 });
-        gsap.set(".cloud3", { y: 0, opacity: 1 });
-
         // Parallax animation for clouds and sky
         // Using the hero section as trigger instead of a separate scroll distance div
         gsap.timeline({
@@ -176,7 +170,7 @@ export default function MiraiHomesPage() {
             >
               <defs>
                 <mask id="m">
-                  <g className="cloud1">
+                  <g className="cloud1-mask">
                     <rect fill="#fff" width="100%" height="801" y="799" />
                     <image
                       xlinkHref="https://assets.codepen.io/721952/cloud1Mask.jpg"
@@ -200,17 +194,15 @@ export default function MiraiHomesPage() {
                 height="800"
                 y="0"
                 preserveAspectRatio="xMidYMid slice"
-                style={{ willChange: 'transform', opacity: 0 }}
               />
 
-              {/* Cloud layers - initially hidden until GSAP sets positions */}
+              {/* Cloud layers */}
               <image
                 className="cloud2"
                 xlinkHref="https://assets.codepen.io/721952/cloud2.png"
                 width="1200"
                 height="800"
                 y="0"
-                style={{ willChange: 'transform', opacity: 0 }}
               />
               <image
                 className="cloud1"
@@ -218,7 +210,6 @@ export default function MiraiHomesPage() {
                 width="1200"
                 height="800"
                 y="0"
-                style={{ willChange: 'transform', opacity: 0 }}
               />
               <image
                 className="cloud3"
@@ -226,7 +217,6 @@ export default function MiraiHomesPage() {
                 width="1200"
                 height="800"
                 y="0"
-                style={{ willChange: 'transform', opacity: 0 }}
               />
 
               <g mask="url(#m)">
